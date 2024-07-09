@@ -1,0 +1,470 @@
+@import url('https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+NG+Modern:wght@100..400&display=swap');
+
+$primary: #060d0d;
+$secondary: #f5f6f4;
+$accent-1: #574393;
+$accent-2: #4fccb4;
+$accent-3: #f5911b;
+$accent-4: #1b1f25;
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+
+body {
+  position: relative;
+  padding-top: 10%;
+  font-family: "Playwrite NG Modern", cursive;
+  background-color: $primary;
+  color: $secondary;
+}
+
+.navbar {
+  background-color: $accent-1;
+  border-bottom: 1px solid $accent-1;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+
+  .logo {
+    font-family: "Poetsen One", sans-serif;
+    color: $accent-3;
+    cursor: pointer;
+  }
+
+  button {
+    background-color: transparent;
+    border: 1px solid $accent-4;
+    color: $secondary;
+    padding: 10px 25px;
+    margin: 5px;
+    cursor: pointer;
+    font-weight: 100;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: $primary;
+      color: $secondary;
+    }
+  }
+
+  .links {
+    button {
+      border: solid 1px transparent;
+
+      &:hover {
+        background-color: transparent;
+        border-bottom: solid 1px $accent-4;
+      }
+    }
+  }
+
+  input {
+    background-color: transparent;
+    width: 50%;
+    border: solid 1px $accent-4;
+    color: $secondary;
+    padding: 10px 25px;
+    transition: all 0.2s;
+
+    &:focus {
+      outline: none;
+      border: solid 1px $accent-2;
+    }
+  }
+}
+
+.auth {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  input {
+    background-color: transparent;
+    border: solid 1px $accent-4;
+    margin: 20px;
+    padding: 10px 25px;
+    color: $secondary;
+    border-radius: 10px;
+    transition: all 0.2s;
+
+    &:focus {
+      outline: none;
+      border: solid 1px $accent-2;
+    }
+  }
+
+  button {
+    border: solid 1px $primary;
+    background-color: $accent-2;
+    margin: 20px;
+    padding: 10px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $accent-3;
+    }
+  }
+}
+
+.create-button {
+  background-color: $accent-2;
+  color: $accent-1;
+  padding: 10px 25px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 10px;
+  border: none;
+
+  &:hover {
+    background-color: $accent-3;
+  }
+}
+
+.subjects {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  button {
+    border: solid 1px $primary;
+    margin: 20px;
+    padding: 10px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+}
+
+.primary-action-button {
+  border: solid 1px $primary;
+  margin: 20px;
+  padding: 10px 25px;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: $secondary;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: $accent-3;
+  }
+}
+
+.secondary-action-button {
+  border: solid 1px $primary;
+  margin: 20px;
+  padding: 10px 25px;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: $accent-2;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: $accent-3;
+  }
+}
+
+.subject-card {
+  margin: 5% 1%;
+  background-color: $accent-1;
+  width: 300px;
+  padding: 3% 2%;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  cursor: default;
+
+  .actions {
+    margin-top: 5%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  &:hover {
+    background-color: $accent-4;
+  }
+
+  svg {
+    width: 20px;
+    cursor: pointer;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: $accent-4;
+    padding: 10%;
+    border-radius: 20px;
+    border: solid 1px $primary;
+  }
+
+  input {
+    background-color: transparent;
+    border: solid 1px $accent-2;
+    margin: 20px;
+    padding: 10px 25px;
+    color: $secondary;
+    border-radius: 10px;
+    transition: all 0.2s;
+    width: 100%;
+
+    &:focus {
+      outline: none;
+      border: solid 1px $accent-3;
+    }
+  }
+}
+
+.home {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+
+  button {
+    border: solid 1px $primary;
+    margin: 20px;
+    padding: 10px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+}
+
+.subject {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  h1 {
+    margin: 5%;
+  }
+
+  h3 {
+    margin-top: 3%;
+  }
+}
+
+.date-time-picker {
+  text-align: center;
+
+  .date-time {
+    display: flex;
+  }
+}
+
+.assignment-card {
+  margin: 1%;
+  background-color: $accent-1;
+  width: 300px;
+  padding: 3% 2%;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  cursor: default;
+
+  p {
+    margin: 5%;
+  }
+
+  .actions {
+    margin-top: 5%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  &:hover {
+    background-color: $accent-4;
+  }
+}
+
+.assignment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  h1 {
+    margin: 2%;
+  }
+
+  h3 {
+    margin-top: 5%;
+  }
+
+  p {
+    margin-bottom: 5%;
+  }
+}
+
+.list {
+  margin-top: 3%;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
+.solution-card {
+  margin: 1%;
+  background-color: $accent-1;
+  width: 300px;
+  padding: 3% 2%;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 5px;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+
+  a {
+    text-decoration: none;
+    color: $primary;
+  }
+
+  p {
+    color: $accent-4;
+  }
+
+  .actions {
+    margin-top: 5%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  &:hover {
+    background-color: $accent-4;
+  }
+}
+
+.searchResult {
+  margin: 5%;
+  display: flex;
+  flex-direction: column;
+
+  h1 {
+    margin: 5%;
+    letter-spacing: 2px;
+  }
+
+  .searchList {
+    margin: 5%;
+    color: $accent-2;
+    letter-spacing: 5px;
+    padding: 2%;
+    display: flex;
+    overflow-x: scroll;
+
+    .searchItem {
+      cursor: pointer;
+      text-align: center;
+      margin: 0px 5%;
+      padding: 5%;
+      background-color: $accent-4;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: $accent-1;
+      }
+    }
+  }
+}
+
+.loading {
+  position: fixed;
+  left: 50%;
+  right: 50%;
+  width: 60px;
+  aspect-ratio: 2;
+  --_g: no-repeat radial-gradient(circle closest-side, #00fafa 90%, #00000000);
+  background:
+    var(--_g) 0% 50%,
+    var(--_g) 50% 50%,
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 50%;
+  animation: l3 1s infinite linear;
+
+  @keyframes l3 {
+    20% {
+      background-position: 0% 0%, 50% 50%, 100% 50%
+    }
+
+    40% {
+      background-position: 0% 100%, 50% 0%, 100% 50%
+    }
+
+    60% {
+      background-position: 0% 50%, 50% 100%, 100% 0%
+    }
+
+    80% {
+      background-position: 0% 50%, 50% 50%, 100% 100%
+    }
+  }
+}
+
+@media only screen and (max-width: 1350px) {
+  .navbar {
+    input {
+      width: 30%;
+    }
+  }
+}
+
+@media only screen and (max-width: 950px) {
+  .navbar {
+    input {
+      width: 20%;
+    }
+  }
+}
+
+@media only screen and (max-width: 1350px) {
+
+  body {
+    margin-top: 20%;
+  }
+
+  .navbar {
+
+    .logo {
+      margin-left: 10px;
+    }
+
+    button {
+      padding: 5px 10px;
+      margin: 5px;
+      font-size: 10px;
+    }
+
+    input {
+      font-size: 10px;
+      padding: 5px 10px;
+    }
+  }
+}

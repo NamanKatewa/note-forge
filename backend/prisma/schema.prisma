@@ -1,0 +1,88 @@
+generator client{
+    provider = "prisma-client-js"
+}
+
+datasource db{
+    provider = "postgresql"
+    url = env("DIRECT_URL")
+}
+
+model User{
+    id String @id @default(uuid())
+    name String @unique
+    email String @unique
+    password String
+    role Role
+    sessions Session[] @relation("UserToSession")
+    subjects Subject[] @relation("UserToSubject")
+    assignments Assignment[] @relation("UserToAssignment")
+    solutions Solution[] @relation("UserToSolution")
+    createdAt DateTime @default(now())
+}
+
+enum Role{
+    admin
+    contributor
+}
+
+model Verify{
+    id String @id @default(uuid())
+    email String
+    code String @db.VarChar(6)
+    createdAt DateTime @default(now())
+}
+
+model Session{
+    id String @id @default(uuid())
+    cookie String
+    browser String
+    userId String
+    user User @relation("UserToSession",fields: [userId],references: [id])
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+}
+
+model PasswordReset{
+    id String @id @default(uuid())
+    email String
+    reset_token String
+    createdAt DateTime @default(now())
+}
+
+model Subject{
+    id String @id @default(uuid())
+    name String @unique
+    users User[] @relation("UserToSubject")
+    assignments Assignment[] @relation("SubjectToAssignment")
+    createdAt DateTime @default(now())
+}
+
+model Assignment{
+    id String @id @default(uuid())
+    title String
+    deadline DateTime
+    subjectId String
+    subject Subject @relation("SubjectToAssignment",fields: [subjectId],references: [id])
+    userId String
+    user User @relation("UserToAssignment",fields: [userId],references: [id])
+    solutions Solution[] @relation("AssignmentToSolution")
+    createdAt DateTime @default(now())
+
+    @@index([subjectId])
+    @@index([userId])
+}
+
+model Solution{
+    id String @id @default(uuid())
+    content String
+    link String
+    assignmentId String
+    assignment Assignment @relation("AssignmentToSolution",fields: [assignmentId],references: [id])
+    userId String
+    user User @relation("UserToSolution",fields: [userId],references: [id])
+    createdAt DateTime @default(now())
+
+    @@index([assignmentId])
+    @@index([userId])
+}
