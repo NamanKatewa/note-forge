@@ -71,7 +71,13 @@ const Subjects = () => {
               onChange={(e) => {
                 setName(e.target.value);
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleCreate();
+                }
+              }}
               placeholder="Subject name"
+              autoFocus={true}
             />
             <button onClick={handleCreate} className="primary-action-button">
               Create

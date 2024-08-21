@@ -202,7 +202,6 @@ router.post("/getsaved", async (req, res) => {
         where: { id: data.userId },
         include: { subjects: true },
       });
-      // console.log(subjects);
       res.status(200).json(subjects);
     } catch (err) {
       console.error("Error fetching subjects for user: ", err);

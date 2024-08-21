@@ -49,10 +49,10 @@ const resetTask = cron.schedule("*/10 * * * * *", async () => {
 });
 resetTask.start();
 
-const port = process.env.PORT;
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
-  console.log(`http://localhost:${port}`);
+  console.log("server started");
 });
 
 app.use("/auth", auth);

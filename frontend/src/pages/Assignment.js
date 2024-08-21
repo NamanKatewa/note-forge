@@ -67,7 +67,7 @@ const Assignment = () => {
       <h1>{detail && detail.subject.name}</h1>
       <h3>{detail && detail.title}</h3>
       <p>{detail && formatDeadline(detail.deadline)}</p>
-      {authenticated && (
+      {authenticated ? (
         <>
           <button className="create-button" onClick={openModal}>
             Add Solution
@@ -96,6 +96,8 @@ const Assignment = () => {
             </button>
           </Modal>
         </>
+      ) : (
+        "Login to add your own solutions"
       )}
       {solutions.length > 0 ? (
         <div className="list">

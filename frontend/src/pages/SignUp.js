@@ -3,6 +3,7 @@ import { apiRoute } from "../utils";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../components/Loader";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const [codeStat, setCodeStat] = useState(false);
@@ -11,6 +12,7 @@ const SignUp = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleVerification = async () => {
     setLoading(true);
@@ -45,6 +47,7 @@ const SignUp = () => {
 
       if (res.status === 200) {
         toast.success(res.data);
+        navigate("/signin");
       }
     } catch (err) {
       if (err.response && err.response.data) {
@@ -65,6 +68,12 @@ const SignUp = () => {
         onChange={(e) => {
           setEmail(e.target.value);
         }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleVerification();
+          }
+        }}
+        autoFocus={true}
       />
       {!codeStat && (
         <button onClick={handleVerification}>Get Verification Code</button>
@@ -77,6 +86,12 @@ const SignUp = () => {
             onChange={(e) => {
               setCode(e.target.value);
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
+            autoFocus={true}
           />
           <input
             type="text"
@@ -84,12 +99,22 @@ const SignUp = () => {
             onChange={(e) => {
               setName(e.target.value);
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
           <input
             type="password"
             placeholder="Password"
             onChange={(e) => {
               setPassword(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
             }}
           />
           <button onClick={handleSubmit}>Sign Up</button>

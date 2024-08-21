@@ -163,7 +163,7 @@ const SubjectCard = ({ data, setRefresh, refresh, saved }) => {
                   }}
                 />
                 <button className="primary-action-button" onClick={handleEdit}>
-                  Save
+                  Save Changes
                 </button>
                 <button
                   className="secondary-action-button"

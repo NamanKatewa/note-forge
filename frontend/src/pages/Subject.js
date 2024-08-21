@@ -83,7 +83,7 @@ const Subject = () => {
   return (
     <div className="subject">
       <h1>{name}</h1>
-      {authenticated && (
+      {authenticated ? (
         <>
           <button className="create-button" onClick={openModal}>
             Add Asignment
@@ -108,6 +108,8 @@ const Subject = () => {
             </button>
           </Modal>
         </>
+      ) : (
+        "Login to add assignments"
       )}
 
       {futureAssignments.length > 0 && (

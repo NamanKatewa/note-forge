@@ -17,6 +17,10 @@ model User{
     subjects Subject[] @relation("UserToSubject")
     assignments Assignment[] @relation("UserToAssignment")
     solutions Solution[] @relation("UserToSolution")
+    notes Note[] @relation("UserToNote")
+    papers Paper[] @relation("UserToPaper")
+    resources Resource[] @relation("UserToResource")
+    books Book[] @relation("UserToBook")
     createdAt DateTime @default(now())
 }
 
@@ -55,6 +59,8 @@ model Subject{
     name String @unique
     users User[] @relation("UserToSubject")
     assignments Assignment[] @relation("SubjectToAssignment")
+    notes Note[] @relation("SubjectToNote")
+    exams Exam[] @relation("SubjectToExam")
     createdAt DateTime @default(now())
 }
 
@@ -73,6 +79,30 @@ model Assignment{
     @@index([userId])
 }
 
+model Resource{
+    id String @id @default(uuid())
+    title String
+    content String
+    link String
+    userId String
+    user User @relation("UserToResource",fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+}
+
+model Book{
+    id String @id @default(uuid())
+    title String
+    imgUrl String
+    link String
+    userId String
+    user User @relation("UserToBook",fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+}
+
 model Solution{
     id String @id @default(uuid())
     content String
@@ -84,5 +114,46 @@ model Solution{
     createdAt DateTime @default(now())
 
     @@index([assignmentId])
+    @@index([userId])
+}
+
+model Note{
+    id String @id @default(uuid())
+    title String
+    content String
+    link String
+    subjectId String
+    subject Subject @relation("SubjectToNote", fields: [subjectId], references: [id])
+    userId String
+    user User @relation("UserToNote",fields: [userId],references: [id])
+    createdAt DateTime @default(now())
+
+    @@index([subjectId])
+    @@index([userId])
+}
+
+model Exam{
+    id String @id @default(uuid())
+    title String
+    deadline DateTime
+    subjectId String
+    subject Subject @relation("SubjectToExam",fields: [subjectId], references: [id])
+    papers Paper[] @relation("ExamToPaper")
+    createdAt DateTime @default(now())
+
+    @@index([subjectId])
+}
+
+model Paper{
+    id String @id @default(uuid())
+    title String
+    link String
+    examId String
+    exam Exam @relation("ExamToPaper",fields: [examId],references: [id])
+    userId String
+    user User @relation("UserToPaper", fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+
+    @@index([examId])
     @@index([userId])
 }

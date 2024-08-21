@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiRoute } from "../utils";
 import { useNavigate } from "react-router-dom";
+import Loader from "../components/Loader";
 
 const Search = () => {
   const [data, setData] = useState();
@@ -22,6 +23,21 @@ const Search = () => {
 
   return (
     <div className="searchResult">
+      {isLoading && <Loader />}
+      {!isLoading &&
+        data.subjects.length === 0 &&
+        data.assignments.length === 0 &&
+        data.solutions.length === 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            No result for {query}
+          </div>
+        )}
       {!isLoading && data.subjects.length > 0 && (
         <>
           <h1>Subjects</h1>

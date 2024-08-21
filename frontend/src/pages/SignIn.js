@@ -23,7 +23,7 @@ const SignIn = () => {
 
       if (res.status === 200) {
         login(res.data.cookie, res.data.role, res.data.userId);
-        navigate("/");
+        navigate("/subjects");
       }
     } catch (err) {
       if (err.response && err.response.data) {
@@ -44,12 +44,23 @@ const SignIn = () => {
         onChange={(e) => {
           setEmail(e.target.value);
         }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSubmit();
+          }
+        }}
+        autoFocus={true}
       />
       <input
         type="password"
         placeholder="Enter your password"
         onChange={(e) => {
           setPassword(e.target.value);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSubmit();
+          }
         }}
       />
       <button onClick={handleSubmit}>Sign In</button>

@@ -15,8 +15,8 @@ $accent-4: #1b1f25;
 
 
 body {
+  padding-top: 50px;
   position: relative;
-  padding-top: 10%;
   font-family: "Playwrite NG Modern", cursive;
   background-color: $primary;
   color: $secondary;
@@ -31,6 +31,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+  z-index: 100;
 
   .logo {
     font-family: "Poetsen One", sans-serif;
@@ -70,8 +71,9 @@ body {
     width: 50%;
     border: solid 1px $accent-4;
     color: $secondary;
-    padding: 10px 25px;
     transition: all 0.2s;
+    padding: 10px 25px;
+    margin: 5px;
 
     &:focus {
       outline: none;
@@ -363,27 +365,32 @@ body {
 }
 
 .searchResult {
-  margin: 5%;
+  margin: 3%;
   display: flex;
   flex-direction: column;
 
   h1 {
-    margin: 5%;
+    margin: 3%;
     letter-spacing: 2px;
   }
 
   .searchList {
-    margin: 5%;
+    margin: 3%;
     color: $accent-2;
     letter-spacing: 5px;
     padding: 2%;
     display: flex;
-    overflow-x: scroll;
+    flex-wrap: wrap;
+    justify-content: center;
 
     .searchItem {
+      width: 200px;
       cursor: pointer;
+      display: flex;
       text-align: center;
-      margin: 0px 5%;
+      align-items: center;
+      justify-content: center;
+      margin: 5%;
       padding: 5%;
       background-color: $accent-4;
       transition: all 0.2s;
@@ -428,14 +435,6 @@ body {
   }
 }
 
-@media only screen and (max-width: 1350px) {
-  .navbar {
-    input {
-      width: 30%;
-    }
-  }
-}
-
 @media only screen and (max-width: 950px) {
   .navbar {
     input {
@@ -446,10 +445,6 @@ body {
 
 @media only screen and (max-width: 1350px) {
 
-  body {
-    margin-top: 20%;
-  }
-
   .navbar {
 
     .logo {
@@ -457,14 +452,52 @@ body {
     }
 
     button {
-      padding: 5px 10px;
+      padding: 10px 10px;
       margin: 5px;
+    }
+
+    input {
+      width: 40%;
+      padding: 10px 10px;
+    }
+  }
+}
+
+@media only screen and (max-width: 850px) {
+  .navbar {
+    font-size: 10px;
+
+    button {
       font-size: 10px;
+      padding: 5px;
     }
 
     input {
       font-size: 10px;
-      padding: 5px 10px;
+      padding: 5px;
+    }
+  }
+}
+
+@media only screen and (max-width: 602px) {
+
+  .navbar {
+    font-size: 10px;
+
+    .logo {
+      display: none;
+    }
+
+    button {
+      font-size: 10px;
+      padding: 5px;
+      min-width: 50px;
+    }
+
+    input {
+      width: 10%;
+      font-size: 10px;
+      padding: 5px;
     }
   }
 }
