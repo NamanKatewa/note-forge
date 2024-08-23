@@ -9,6 +9,11 @@ const subjects = require("./routes/subjects");
 const assignments = require("./routes/assignments");
 const solution = require("./routes/solution");
 const search = require("./routes/search");
+const notes = require("./routes/notes");
+const exams = require("./routes/exams");
+const papers = require("./routes/papers");
+const resources = require("./routes/resources");
+const books = require("./routes/books");
 
 const app = express();
 
@@ -60,3 +65,8 @@ app.use("/subjects", subjects);
 app.use("/assignments", assignments);
 app.use("/solution", solution);
 app.use("/search", search);
+app.use("/notes", notes);
+app.use("/exams", exams);
+app.use("/papers", papers);
+app.use("/resources", resources);
+app.use("/books", books);

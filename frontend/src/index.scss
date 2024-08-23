@@ -130,7 +130,7 @@ body {
   }
 }
 
-.subjects {
+.page {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -182,14 +182,6 @@ body {
   letter-spacing: 1px;
   cursor: default;
 
-  .actions {
-    margin-top: 5%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-evenly;
-  }
-
   &:hover {
     background-color: $accent-4;
   }
@@ -197,6 +189,33 @@ body {
   svg {
     width: 20px;
     cursor: pointer;
+  }
+}
+
+.actions {
+  margin-top: 5%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.book-card {
+  margin: 5% 1%;
+  background-color: $accent-1;
+  width: 300px;
+  padding: 3% 2%;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  cursor: default;
+
+  img {
+    width: 100%;
+  }
+
+  &:hover {
+    background-color: $accent-4;
   }
 }
 
@@ -289,14 +308,6 @@ body {
     margin: 5%;
   }
 
-  .actions {
-    margin-top: 5%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-evenly;
-  }
-
   &:hover {
     background-color: $accent-4;
   }
@@ -351,12 +362,31 @@ body {
     color: $accent-4;
   }
 
-  .actions {
-    margin-top: 5%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-evenly;
+  &:hover {
+    background-color: $accent-4;
+  }
+}
+
+.paper-card {
+  margin: 1%;
+  background-color: $accent-1;
+  width: 300px;
+  padding: 3% 2%;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 5px;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+
+  a {
+    text-decoration: none;
+    color: $primary;
+  }
+
+  p {
+    color: $accent-4;
   }
 
   &:hover {

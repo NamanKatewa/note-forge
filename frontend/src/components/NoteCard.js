@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import { useAuth } from "../auth";
-import toast from "react-hot-toast";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
 
-const SolutionCard = ({ data, refresh, setRefresh }) => {
+const NoteCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState(data.title);
   const [content, setContent] = useState(data.content);
   const [link, setLink] = useState(data.link);
-  const { authenticated, getUserId, getUserRole, getSessionCookie } = useAuth();
+  const { getUserRole, authenticated, getSessionCookie, getUserId } = useAuth();
   const role = getUserRole();
   const id = getUserId();
 
@@ -25,11 +26,12 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   const handleEdit = async (e) => {
     e.stopPropagation();
     try {
-      const res = await axios.post(`${apiRoute}/solution/edit`, {
+      const res = await axios.post(`${apiRoute}/notes/edit`, {
         cookie: getSessionCookie(),
         id: data.id,
-        link,
+        title,
         content,
+        link,
       });
 
       if (res.status === 200) {
@@ -49,7 +51,7 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   const handleDelete = async (e) => {
     e.stopPropagation();
     try {
-      const res = await axios.post(`${apiRoute}/solution/remove`, {
+      const res = await axios.post(`${apiRoute}/notes/remove`, {
         cookie: getSessionCookie(),
         id: data.id,
       });
@@ -69,38 +71,51 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   };
 
   return (
-    <div className="solution-card">
-      <h4>{data.content}</h4>
-      <a
-        href={data.link}
-        target="_blank"
-        rel="noreferrer"
-        className="primary-action-button"
-      >
-        Download
-      </a>
-      <p>Shared by {data.user.name}</p>
+    <div
+      className="assignment-card"
+      onClick={() => window.open(data.link, "_blank")}
+    >
+      <p> {data.title}</p>
+      <p> {data.content}</p>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
           <button className="secondary-action-button" onClick={openModal}>
             Edit
           </button>
           <Modal show={showModal} onClose={closeModal}>
+            <label>Title</label>
             <input
               type="text"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleEdit();
                 }
               }}
-              autoFocus={true}
             />
+            <label>Content</label>
+            <input
+              type="text"
+              value={content}
+              onChange={(e) => {
+                setContent(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleEdit();
+                }
+              }}
+            />
+            <label>Link</label>
             <input
               type="text"
               value={link}
-              onChange={(e) => setLink(e.target.value)}
+              onChange={(e) => {
+                setLink(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleEdit();
@@ -125,4 +140,4 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   );
 };
 
-export default SolutionCard;
+export default NoteCard;

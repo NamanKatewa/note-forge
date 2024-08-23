@@ -1,17 +1,22 @@
 import React, { useState } from "react";
-import { useAuth } from "../auth";
-import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { formatDateTime, formatDeadline } from "../utils";
+import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
+import DateTimePicker from "./DateTimePicker";
 
-const SolutionCard = ({ data, refresh, setRefresh }) => {
+const ExamCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
-  const [content, setContent] = useState(data.content);
-  const [link, setLink] = useState(data.link);
-  const { authenticated, getUserId, getUserRole, getSessionCookie } = useAuth();
+  const [title, setTitle] = useState(data.title);
+  const [deadline, setDeadline] = useState("");
+  const { getUserRole, authenticated, getSessionCookie, getUserId } = useAuth();
+  const { formattedDate, formattedTime } = formatDateTime(data.deadline);
   const role = getUserRole();
   const id = getUserId();
+  const navigate = useNavigate();
 
   const openModal = (e) => {
     e.stopPropagation();
@@ -25,11 +30,11 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   const handleEdit = async (e) => {
     e.stopPropagation();
     try {
-      const res = await axios.post(`${apiRoute}/solution/edit`, {
+      const res = await axios.post(`${apiRoute}/exams/edit`, {
         cookie: getSessionCookie(),
         id: data.id,
-        link,
-        content,
+        title,
+        deadline,
       });
 
       if (res.status === 200) {
@@ -49,7 +54,7 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   const handleDelete = async (e) => {
     e.stopPropagation();
     try {
-      const res = await axios.post(`${apiRoute}/solution/remove`, {
+      const res = await axios.post(`${apiRoute}/exams/remove`, {
         cookie: getSessionCookie(),
         id: data.id,
       });
@@ -69,17 +74,12 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   };
 
   return (
-    <div className="solution-card">
-      <h4>{data.content}</h4>
-      <a
-        href={data.link}
-        target="_blank"
-        rel="noreferrer"
-        className="primary-action-button"
-      >
-        Download
-      </a>
-      <p>Shared by {data.user.name}</p>
+    <div
+      className="assignment-card"
+      onClick={() => navigate(`/exams/${data.id}`)}
+    >
+      <p> {data.title}</p>
+      <p> {formatDeadline(data.deadline)}</p>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
           <button className="secondary-action-button" onClick={openModal}>
@@ -88,24 +88,21 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
           <Modal show={showModal} onClose={closeModal}>
             <input
               type="text"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleEdit();
                 }
               }}
-              autoFocus={true}
             />
-            <input
-              type="text"
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleEdit();
-                }
-              }}
+            <DateTimePicker
+              onDateTimeChange={setDeadline}
+              text="Edit deadline"
+              initialDate={formattedDate}
+              initialTime={formattedTime}
             />
             <button className="primary-action-button" onClick={handleEdit}>
               Save
@@ -125,4 +122,4 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   );
 };
 
-export default SolutionCard;
+export default ExamCard;

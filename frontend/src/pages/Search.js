@@ -11,15 +11,14 @@ const Search = () => {
   const { query } = useParams();
   const navigate = useNavigate();
 
-  const getResults = async () => {
-    const res = await axios.post(`${apiRoute}/search/`, { query });
-    setData(res.data);
-    setIsLoading(false);
-  };
-
   useEffect(() => {
+    const getResults = async () => {
+      const res = await axios.post(`${apiRoute}/search/`, { query });
+      setData(res.data);
+      setIsLoading(false);
+    };
     getResults();
-  }, [data]);
+  }, [query]);
 
   return (
     <div className="searchResult">
@@ -27,7 +26,12 @@ const Search = () => {
       {!isLoading &&
         data.subjects.length === 0 &&
         data.assignments.length === 0 &&
-        data.solutions.length === 0 && (
+        data.solutions.length === 0 &&
+        data.notes.length === 0 &&
+        data.exams.length === 0 &&
+        data.papers.length === 0 &&
+        data.resources.length === 0 &&
+        data.books.length === 0 && (
           <div
             style={{
               display: "flex",
@@ -78,9 +82,96 @@ const Search = () => {
               <div
                 className="searchItem"
                 key={s.id}
-                onClick={() => (window.location.href = s.link)}
+                onClick={() => window.open(s.link, "_blank")}
               >
                 {s.content}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {!isLoading && data.notes.length > 0 && (
+        <>
+          <h1>Notes</h1>
+          <div className="searchList">
+            {data.notes.map((n) => (
+              <div
+                className="searchItem"
+                key={n.id}
+                onClick={() => window.open(n.link, "_blank")}
+              >
+                {n.title}
+                <br />
+                {n.content}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {!isLoading && data.exams.length > 0 && (
+        <>
+          <h1>Exams</h1>
+          <div className="searchList">
+            {data.exams.map((e) => (
+              <div
+                className="searchItem"
+                key={e.id}
+                onClick={() => navigate(`/exams/${e.id}`)}
+              >
+                {e.title}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {!isLoading && data.papers.length > 0 && (
+        <>
+          <h1>Papers</h1>
+          <div className="searchList">
+            {data.papers.map((e) => (
+              <div
+                className="searchItem"
+                key={e.id}
+                onClick={() => window.open(e.link, "_blank")}
+              >
+                {e.title}
+                <br />
+                {e.exam.title}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {!isLoading && data.resources.length > 0 && (
+        <>
+          <h1>Resources</h1>
+          <div className="searchList">
+            {data.resources.map((e) => (
+              <div
+                className="searchItem"
+                key={e.id}
+                onClick={() => window.open(e.link, "_blank")}
+              >
+                {e.title}
+                <br />
+                {e.content}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {!isLoading && data.books.length > 0 && (
+        <>
+          <h1>Books</h1>
+          <div className="searchList">
+            {data.books.map((e) => (
+              <div
+                className="searchItem"
+                key={e.id}
+                onClick={() => window.open(e.link, "_blank")}
+              >
+                <img src={e.imgUrl} alt="" />
+                {e.title}
               </div>
             ))}
           </div>

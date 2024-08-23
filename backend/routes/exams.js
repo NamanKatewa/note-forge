@@ -8,7 +8,7 @@ router.post("/subject", async (req, res) => {
     res.status(400).json("Id is required");
   } else {
     try {
-      const data = await db.assignment.findMany({
+      const data = await db.exam.findMany({
         where: { subjectId },
         orderBy: { deadline: "asc" },
       });
@@ -18,7 +18,7 @@ router.post("/subject", async (req, res) => {
         res.status(400).json("Not Found");
       }
     } catch (err) {
-      console.error("Error fetching assignments: ", err);
+      console.error("Error fetching exams ", err);
       res.status(500).json("Internal Server Error");
     }
   }
@@ -32,24 +32,23 @@ router.post("/add", async (req, res) => {
   if (!data) {
     res.status(401).json("Unauthorized");
   } else if (!title) {
-    res.status(400).json("Assignment title is required");
+    res.status(400).json("Exam title is required");
   } else if (!deadline) {
-    res.status(400).json("Assignment deadline is required");
+    res.status(400).json("Exam deadline is required");
   } else if (!subjectId) {
     res.status(400).json("Subject id is required");
   } else {
     try {
-      await db.assignment.create({
+      await db.exam.create({
         data: {
           title,
           deadline,
           subject: { connect: { id: subjectId } },
-          user: { connect: { id: data.userId } },
         },
       });
-      res.status(200).json("Assignment Created");
+      res.status(200).json("Exam Created");
     } catch (err) {
-      console.error("Error adding Assignment: ", err);
+      console.error("Error adding exam: ", err);
       res.status(500).json("Internal Server Error");
     }
   }
@@ -63,25 +62,25 @@ router.post("/remove", async (req, res) => {
   if (!data) {
     res.status(401).json("Unauthorized");
   } else if (!id) {
-    res.status(400).json("Assignment id is required");
+    res.status(400).json("Exam id is required");
   } else {
     try {
       const user = await db.user.findUnique({ where: { id: data.userId } });
       if (user.role !== "admin") {
         res.status(401).json("Unauthorized");
       } else {
-        const ass = await db.assignment.findFirst({ where: { id } });
+        const ass = await db.exam.findFirst({ where: { id } });
         if (!ass) {
-          res.status(400).json("Assignment doesn't exist");
+          res.status(400).json("Exam doesn't exist");
         } else {
-          await db.assignment.delete({
+          await db.exam.delete({
             where: { id },
           });
-          res.status(200).json("Assignment Deleted");
+          res.status(200).json("Exam Deleted");
         }
       }
     } catch (err) {
-      console.error("Error deleting assignment: ", err);
+      console.error("Error deleting exam: ", err);
       res.status(500).json("Internal Server Error");
     }
   }
@@ -95,26 +94,26 @@ router.post("/edit", async (req, res) => {
   if (!data) {
     res.status(401).json("Unauthorized");
   } else if (!id) {
-    res.status(400).json("Assignment id is required");
+    res.status(400).json("Exam id is required");
   } else {
     try {
       const user = await db.user.findUnique({ where: { id: data.userId } });
-      const ass = await db.assignment.findFirst({ where: { id } });
+      const ass = await db.exam.findFirst({ where: { id } });
       if (user.role !== "admin" && ass.userId !== data.userId) {
         res.status(401).json("Unauthorized");
       } else {
         if (!ass) {
-          res.status(400).json("Assignment doesn't exist");
+          res.status(400).json("Examt doesn't exist");
         } else {
-          await db.assignment.update({
+          await db.exam.update({
             where: { id },
             data: { title, deadline },
           });
-          res.status(200).json("Assignment edited");
+          res.status(200).json("Exam edited");
         }
       }
     } catch (err) {
-      console.error("Error editing Assignment: ", err);
+      console.error("Error editing Exam: ", err);
       res.status(500).json("Internal Server Error");
     }
   }
@@ -126,7 +125,7 @@ router.post("/detail", async (req, res) => {
     res.status(400).json("Id is required");
   } else {
     try {
-      const data = await db.assignment.findUnique({
+      const data = await db.exam.findUnique({
         where: { id },
         select: {
           deadline: true,
@@ -142,7 +141,7 @@ router.post("/detail", async (req, res) => {
         res.status(400).json("Not Found");
       }
     } catch (err) {
-      console.error("Error fetching assignment: ", err);
+      console.error("Error fetching exam: ", err);
       res.status(500).json("Internal Server Error");
     }
   }

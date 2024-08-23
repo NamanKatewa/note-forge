@@ -4,14 +4,15 @@ import Modal from "../components/Modal";
 import axios from "axios";
 import { apiRoute } from "../utils";
 import toast from "react-hot-toast";
-import SubjectCard from "../components/SubjectCard";
+import BookCard from "../components/BookCard";
 
-const Subjects = () => {
+const Books = () => {
   const [showModal, setShowModal] = useState(false);
   const { authenticated, getSessionCookie, getUserRole } = useAuth();
-  const [name, setName] = useState("");
-  const [subjects, setSubjects] = useState([]);
-  const [savedSubjects, setSavedSubjects] = useState([]);
+  const [title, setTitle] = useState("");
+  const [imgUrl, setImgUrl] = useState("");
+  const [link, setLink] = useState("");
+  const [resources, setResources] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const role = getUserRole();
 
@@ -20,9 +21,11 @@ const Subjects = () => {
 
   const handleCreate = async () => {
     try {
-      const res = await axios.post(`${apiRoute}/subjects/add`, {
+      const res = await axios.post(`${apiRoute}/books/add`, {
         cookie: getSessionCookie(),
-        name,
+        title,
+        imgUrl,
+        link,
       });
 
       if (res.status === 200) {
@@ -39,22 +42,13 @@ const Subjects = () => {
     }
   };
 
-  useEffect(() => {
-    const getSubjects = async () => {
-      const res = await axios.get(`${apiRoute}/subjects/all`);
-      setSubjects(res.data);
-    };
+  const getBooks = async () => {
+    const res = await axios.get(`${apiRoute}/books/all`);
+    setResources(res.data);
+  };
 
-    const getSavedSubjects = async () => {
-      const res = await axios.post(`${apiRoute}/subjects/getsaved`, {
-        cookie: getSessionCookie(),
-      });
-      setSavedSubjects(res.data.subjects);
-    };
-    getSubjects();
-    if (authenticated) {
-      getSavedSubjects();
-    }
+  useEffect(() => {
+    getBooks();
   }, [refresh, authenticated]);
 
   return (
@@ -62,21 +56,48 @@ const Subjects = () => {
       {authenticated && role === "admin" && (
         <>
           <button className="create-button" onClick={openModal}>
-            Create Subject
+            Create Books
           </button>
           <Modal show={showModal} onClose={closeModal}>
+            <label>Title</label>
             <input
               type="text"
               onChange={(e) => {
-                setName(e.target.value);
+                setTitle(e.target.value);
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleCreate();
                 }
               }}
-              placeholder="Subject name"
+              placeholder="Book Title"
               autoFocus={true}
+            />
+            <label>Image</label>
+            <input
+              type="text"
+              onChange={(e) => {
+                setImgUrl(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleCreate();
+                }
+              }}
+              placeholder="Book Image"
+            />
+            <label>Link</label>
+            <input
+              type="text"
+              onChange={(e) => {
+                setLink(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleCreate();
+                }
+              }}
+              placeholder="Book Link"
             />
             <button onClick={handleCreate} className="primary-action-button">
               Create
@@ -89,16 +110,12 @@ const Subjects = () => {
       )}
 
       <div className="list">
-        {subjects &&
-          subjects.map((s) => {
-            const isSaved = savedSubjects.some(
-              (savedSubject) => savedSubject.id === s.id
-            );
+        {resources &&
+          resources.map((r) => {
             return (
-              <SubjectCard
-                key={s.id}
-                data={s}
-                saved={isSaved}
+              <BookCard
+                key={r.id}
+                data={r}
                 setRefresh={setRefresh}
                 refresh={refresh}
               />
@@ -109,4 +126,4 @@ const Subjects = () => {
   );
 };
 
-export default Subjects;
+export default Books;

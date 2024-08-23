@@ -3,4 +3,9 @@ function isValidCatboxUrl(url) {
   return urlRegex.test(url);
 }
 
-module.exports = { isValidCatboxUrl };
+function isValidUrl(url) {
+  urlRegex = /^(https?:\/\/)?([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+)(\/[^\s]*)?$/;
+  return urlRegex.test(url);
+}
+
+module.exports = { isValidCatboxUrl, isValidUrl };

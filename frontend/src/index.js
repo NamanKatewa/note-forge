@@ -13,6 +13,9 @@ import Subjects from "./pages/Subjects";
 import Subject from "./pages/Subject";
 import Assignment from "./pages/Assignment";
 import Search from "./pages/Search";
+import Resources from "./pages/Resources";
+import Books from "./pages/Books";
+import Exam from "./pages/Exam";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -28,7 +31,10 @@ root.render(
         <Route path="/subjects" element={<Subjects />} />
         <Route path="/subjects/:subjectId/:name" element={<Subject />} />
         <Route path="/assignments/:assignmentId" element={<Assignment />} />
+        <Route path="/exams/:examId" element={<Exam />} />
         <Route path="/search/:query" element={<Search />} />
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/books" element={<Books />} />
       </Routes>
     </AuthProvider>
   </Router>

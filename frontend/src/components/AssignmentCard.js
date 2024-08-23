@@ -92,6 +92,11 @@ const AssignmentCard = ({ data, refresh, setRefresh }) => {
               onChange={(e) => {
                 setTitle(e.target.value);
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleEdit();
+                }
+              }}
             />
             <DateTimePicker
               onDateTimeChange={setDeadline}

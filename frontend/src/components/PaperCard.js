@@ -5,9 +5,9 @@ import axios from "axios";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
 
-const SolutionCard = ({ data, refresh, setRefresh }) => {
+const PaperCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
-  const [content, setContent] = useState(data.content);
+  const [title, setTitle] = useState(data.title);
   const [link, setLink] = useState(data.link);
   const { authenticated, getUserId, getUserRole, getSessionCookie } = useAuth();
   const role = getUserRole();
@@ -25,11 +25,11 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   const handleEdit = async (e) => {
     e.stopPropagation();
     try {
-      const res = await axios.post(`${apiRoute}/solution/edit`, {
+      const res = await axios.post(`${apiRoute}/papers/edit`, {
         cookie: getSessionCookie(),
         id: data.id,
         link,
-        content,
+        title,
       });
 
       if (res.status === 200) {
@@ -49,7 +49,7 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   const handleDelete = async (e) => {
     e.stopPropagation();
     try {
-      const res = await axios.post(`${apiRoute}/solution/remove`, {
+      const res = await axios.post(`${apiRoute}/papers/remove`, {
         cookie: getSessionCookie(),
         id: data.id,
       });
@@ -69,8 +69,8 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   };
 
   return (
-    <div className="solution-card">
-      <h4>{data.content}</h4>
+    <div className="paper-card">
+      <h4>{data.title}</h4>
       <a
         href={data.link}
         target="_blank"
@@ -86,10 +86,11 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
             Edit
           </button>
           <Modal show={showModal} onClose={closeModal}>
+            <label>Title</label>
             <input
               type="text"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleEdit();
@@ -97,6 +98,7 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
               }}
               autoFocus={true}
             />
+            <label>Link</label>
             <input
               type="text"
               value={link}
@@ -125,4 +127,4 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
   );
 };
 
-export default SolutionCard;
+export default PaperCard;

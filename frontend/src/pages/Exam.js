@@ -5,35 +5,35 @@ import { useAuth } from "../auth";
 import { apiRoute, formatDeadline } from "../utils";
 import Modal from "../components/Modal";
 import toast from "react-hot-toast";
-import SolutionCard from "../components/SolutionCard";
+import PaperCard from "../components/PaperCard";
 
-const Assignment = () => {
+const Exam = () => {
   const [detail, setDetail] = useState();
   const [refresh, setRefresh] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
   const [link, setLink] = useState("");
-  const [solutions, setSolutions] = useState([]);
-  const { assignmentId } = useParams();
+  const [papers, setPapers] = useState([]);
+  const { examId } = useParams();
   const { authenticated, getSessionCookie } = useAuth();
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
 
   const getDetail = async () => {
-    const res = await axios.post(`${apiRoute}/assignments/detail`, {
-      id: assignmentId,
+    const res = await axios.post(`${apiRoute}/exams/detail`, {
+      id: examId,
     });
     setDetail(res.data);
   };
 
   const handleAdd = async () => {
     try {
-      const res = await axios.post(`${apiRoute}/solution/add`, {
+      const res = await axios.post(`${apiRoute}/papers/add`, {
         cookie: getSessionCookie(),
-        content,
+        title,
         link,
-        assignmentId,
+        examId,
       });
 
       if (res.status === 200) {
@@ -50,16 +50,16 @@ const Assignment = () => {
     }
   };
 
-  const getSolutions = async () => {
-    const res = await axios.post(`${apiRoute}/solution/assignment`, {
-      assignmentId,
+  const getPapers = async () => {
+    const res = await axios.post(`${apiRoute}/papers/exam`, {
+      examId,
     });
-    setSolutions(res.data);
+    setPapers(res.data);
   };
 
   useEffect(() => {
     getDetail();
-    getSolutions();
+    getPapers();
   }, [refresh]);
 
   return (
@@ -70,13 +70,14 @@ const Assignment = () => {
       {authenticated ? (
         <>
           <button className="create-button" onClick={openModal}>
-            Add Solution
+            Add Paper
           </button>
           <Modal show={showModal} onClose={closeModal}>
+            <label>Title</label>
             <input
               type="text"
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Solution Description"
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Paper Title"
               autoFocus={true}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -84,10 +85,16 @@ const Assignment = () => {
                 }
               }}
             />
+            <label>Link</label>
             <input
               type="text"
               onChange={(e) => setLink(e.target.value)}
               placeholder="Catbox.moe link for the solution"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAdd();
+                }
+              }}
             />
             <button className="primary-action-button" onClick={handleAdd}>
               Add
@@ -105,10 +112,10 @@ const Assignment = () => {
       ) : (
         "Login to add your own solutions"
       )}
-      {solutions.length > 0 ? (
+      {papers.length > 0 ? (
         <div className="list">
-          {solutions.map((s) => (
-            <SolutionCard
+          {papers.map((s) => (
+            <PaperCard
               key={s.id}
               data={s}
               refresh={refresh}
@@ -117,10 +124,10 @@ const Assignment = () => {
           ))}
         </div>
       ) : (
-        <h4>No solutions yet</h4>
+        <h4>No papers yet</h4>
       )}
     </div>
   );
 };
 
-export default Assignment;
+export default Exam;

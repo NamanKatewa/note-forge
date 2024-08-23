@@ -39,10 +39,58 @@ router.post("/", async (req, res) => {
         select: { id: true, content: true, link: true },
       });
 
+      const notes = await db.note.findMany({
+        where: {
+          OR: [
+            { title: { contains: query, mode: "insensitive" } },
+            { content: { contains: query, mode: "insensitive" } },
+          ],
+        },
+      });
+
+      const exams = await db.exam.findMany({
+        where: {
+          title: { contains: query, mode: "insensitive" },
+        },
+      });
+
+      const papers = await db.paper.findMany({
+        where: {
+          title: { contains: query, mode: "insensitive" },
+        },
+        select: {
+          exam: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      });
+
+      const resources = await db.resource.findMany({
+        where: {
+          OR: [
+            { title: { contains: query, mode: "insensitive" } },
+            { content: { contains: query, mode: "insensitive" } },
+          ],
+        },
+      });
+
+      const books = await db.book.findMany({
+        where: {
+          title: { contains: query, mode: "insensitive" },
+        },
+      });
+
       res.status(200).json({
         subjects,
         assignments,
         solutions,
+        notes,
+        exams,
+        papers,
+        resources,
+        books,
       });
     } catch (err) {
       console.error("Error performing search: ", err);
