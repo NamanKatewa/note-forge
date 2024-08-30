@@ -6,7 +6,7 @@ import {
   parseISO,
 } from "date-fns";
 
-export const apiRoute = "http://localhost:5000";
+export const apiRoute = "https://note-forge.onrender.com";
 
 export const formatDeadline = (isoDate) => {
   const date = new Date(isoDate);
