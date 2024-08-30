@@ -18,11 +18,6 @@ const AuthProvider = ({ children }) => {
     return Cookies.get("userId");
   };
 
-  const checkAuth = () => {
-    const cookie = getSessionCookie();
-    setAuthenticated(!!cookie);
-  };
-
   const login = (token, role, userId) => {
     Cookies.set("session", token);
     Cookies.set("role", role);
@@ -38,6 +33,10 @@ const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    const checkAuth = () => {
+      const cookie = getSessionCookie();
+      setAuthenticated(!!cookie);
+    };
     checkAuth();
   }, []);
 

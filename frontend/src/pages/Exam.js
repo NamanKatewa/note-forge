@@ -20,13 +20,6 @@ const Exam = () => {
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
 
-  const getDetail = async () => {
-    const res = await axios.post(`${apiRoute}/exams/detail`, {
-      id: examId,
-    });
-    setDetail(res.data);
-  };
-
   const handleAdd = async () => {
     try {
       const res = await axios.post(`${apiRoute}/papers/add`, {
@@ -50,17 +43,23 @@ const Exam = () => {
     }
   };
 
-  const getPapers = async () => {
-    const res = await axios.post(`${apiRoute}/papers/exam`, {
-      examId,
-    });
-    setPapers(res.data);
-  };
-
   useEffect(() => {
+    const getDetail = async () => {
+      const res = await axios.post(`${apiRoute}/exams/detail`, {
+        id: examId,
+      });
+      setDetail(res.data);
+    };
+
+    const getPapers = async () => {
+      const res = await axios.post(`${apiRoute}/papers/exam`, {
+        examId,
+      });
+      setPapers(res.data);
+    };
     getDetail();
     getPapers();
-  }, [refresh]);
+  }, [refresh, examId]);
 
   return (
     <div className="assignment">

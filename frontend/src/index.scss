@@ -15,7 +15,7 @@ $accent-4: #1b1f25;
 
 
 body {
-  padding-top: 50px;
+  padding-top: 100px;
   position: relative;
   font-family: "Playwrite NG Modern", cursive;
   background-color: $primary;
@@ -28,10 +28,21 @@ body {
   position: fixed;
   width: 100%;
   top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
   z-index: 100;
+
+  .top {
+    width: 100%s;
+    align-items: center;
+    justify-content: space-evenly;
+    display: flex;
+  }
+
+  .search {
+    width: 100%s;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+  }
 
   .logo {
     font-family: "Poetsen One", sans-serif;
@@ -68,7 +79,7 @@ body {
 
   input {
     background-color: transparent;
-    width: 50%;
+    width: 80%;
     border: solid 1px $accent-4;
     color: $secondary;
     transition: all 0.2s;
@@ -465,13 +476,6 @@ body {
   }
 }
 
-@media only screen and (max-width: 950px) {
-  .navbar {
-    input {
-      width: 20%;
-    }
-  }
-}
 
 @media only screen and (max-width: 1350px) {
 
@@ -486,10 +490,6 @@ body {
       margin: 5px;
     }
 
-    input {
-      width: 40%;
-      padding: 10px 10px;
-    }
   }
 }
 
@@ -501,10 +501,13 @@ body {
       font-size: 10px;
       padding: 5px;
     }
+  }
+}
 
-    input {
-      font-size: 10px;
-      padding: 5px;
+@media only screen and (max-width:700px) {
+  .navbar {
+    .logo {
+      display: none;
     }
   }
 }
@@ -525,7 +528,7 @@ body {
     }
 
     input {
-      width: 10%;
+      width: 60%;
       font-size: 10px;
       padding: 5px;
     }

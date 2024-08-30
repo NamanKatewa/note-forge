@@ -55,7 +55,7 @@ const Subjects = () => {
     if (authenticated) {
       getSavedSubjects();
     }
-  }, [refresh, authenticated]);
+  }, [refresh, authenticated, getSessionCookie]);
 
   return (
     <div className="page">

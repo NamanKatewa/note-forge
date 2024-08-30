@@ -21,7 +21,7 @@ function Home() {
       }
     };
     getSubjects();
-  }, [refresh]);
+  }, [refresh, getSessionCookie]);
 
   return (
     <div className="home">

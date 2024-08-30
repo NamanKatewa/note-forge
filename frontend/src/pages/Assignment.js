@@ -20,13 +20,6 @@ const Assignment = () => {
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
 
-  const getDetail = async () => {
-    const res = await axios.post(`${apiRoute}/assignments/detail`, {
-      id: assignmentId,
-    });
-    setDetail(res.data);
-  };
-
   const handleAdd = async () => {
     try {
       const res = await axios.post(`${apiRoute}/solution/add`, {
@@ -50,17 +43,24 @@ const Assignment = () => {
     }
   };
 
-  const getSolutions = async () => {
-    const res = await axios.post(`${apiRoute}/solution/assignment`, {
-      assignmentId,
-    });
-    setSolutions(res.data);
-  };
-
   useEffect(() => {
+    const getDetail = async () => {
+      const res = await axios.post(`${apiRoute}/assignments/detail`, {
+        id: assignmentId,
+      });
+      setDetail(res.data);
+    };
+
+    const getSolutions = async () => {
+      const res = await axios.post(`${apiRoute}/solution/assignment`, {
+        assignmentId,
+      });
+      setSolutions(res.data);
+    };
+
     getDetail();
     getSolutions();
-  }, [refresh]);
+  }, [refresh, assignmentId]);
 
   return (
     <div className="assignment">
