@@ -175,15 +175,17 @@ const Subject = () => {
       <h1>{name}</h1>
       {authenticated ? (
         <>
-          <button className="create-button" onClick={openAssignmentModal}>
-            Add Asignment
-          </button>
-          <button className="create-button" onClick={openNoteModal}>
-            Add Notes
-          </button>
-          <button className="create-button" onClick={openExamModal}>
-            Add Exams
-          </button>
+          <div className="createButtons">
+            <button className="create-button" onClick={openAssignmentModal}>
+              Add Asignment
+            </button>
+            <button className="create-button" onClick={openNoteModal}>
+              Add Notes
+            </button>
+            <button className="create-button" onClick={openExamModal}>
+              Add Exams
+            </button>
+          </div>
           <Modal show={showAssignmentModal} onClose={closeAssignmentModal}>
             <label>Assignment Title</label>
             <input

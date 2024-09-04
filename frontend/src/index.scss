@@ -131,6 +131,7 @@ body {
   background-color: $accent-2;
   color: $accent-1;
   padding: 10px 25px;
+  margin: 50px;
   cursor: pointer;
   transition: all 0.2s;
   border-radius: 10px;
@@ -139,6 +140,10 @@ body {
   &:hover {
     background-color: $accent-3;
   }
+}
+
+.create-buttons {
+  display: flex;
 }
 
 .page {
@@ -258,7 +263,7 @@ body {
     color: $secondary;
     border-radius: 10px;
     transition: all 0.2s;
-    width: 100%;
+    width: 50%;
 
     &:focus {
       outline: none;
@@ -290,6 +295,10 @@ body {
 
   h1 {
     margin: 5%;
+  }
+
+  h2 {
+    margin: 20px;
   }
 
   h3 {
@@ -476,6 +485,17 @@ body {
   }
 }
 
+.footer {
+  margin-top: 100px;
+}
+
+footer {
+  margin-top: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
 
 @media only screen and (max-width: 1350px) {
 

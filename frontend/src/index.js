@@ -16,6 +16,7 @@ import Search from "./pages/Search";
 import Resources from "./pages/Resources";
 import Books from "./pages/Books";
 import Exam from "./pages/Exam";
+import Footer from "./components/Footer";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -36,6 +37,7 @@ root.render(
         <Route path="/resources" element={<Resources />} />
         <Route path="/books" element={<Books />} />
       </Routes>
+      <Footer />
     </AuthProvider>
   </Router>
 );
