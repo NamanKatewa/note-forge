@@ -457,6 +457,7 @@ body {
   left: 50%;
   right: 50%;
   width: 60px;
+  z-index: 150;
   aspect-ratio: 2;
   --_g: no-repeat radial-gradient(circle closest-side, #00fafa 90%, #00000000);
   background:

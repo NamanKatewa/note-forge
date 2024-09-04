@@ -25,11 +25,11 @@ root.render(
     <AuthProvider>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Subjects />} />
+        <Route path="/saved" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
-        <Route path="/subjects" element={<Subjects />} />
         <Route path="/subjects/:subjectId/:name" element={<Subject />} />
         <Route path="/assignments/:assignmentId" element={<Assignment />} />
         <Route path="/exams/:examId" element={<Exam />} />

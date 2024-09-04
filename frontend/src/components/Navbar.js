@@ -15,7 +15,7 @@ const Navbar = () => {
         <div
           className="logo"
           onClick={() => {
-            navigate("/subjects");
+            navigate("/");
           }}
         >
           Note Forge
@@ -23,7 +23,7 @@ const Navbar = () => {
         <div className="links">
           <button
             onClick={() => {
-              navigate("/subjects");
+              navigate("/");
             }}
           >
             Subjects
@@ -44,7 +44,7 @@ const Navbar = () => {
           </button>
           <button
             onClick={() => {
-              navigate("/");
+              navigate("/saved");
             }}
           >
             Saved
