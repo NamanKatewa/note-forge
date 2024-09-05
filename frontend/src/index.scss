@@ -437,6 +437,7 @@ body {
       width: 200px;
       cursor: pointer;
       display: flex;
+      flex-direction: column;
       text-align: center;
       align-items: center;
       justify-content: center;
@@ -444,6 +445,10 @@ body {
       padding: 5%;
       background-color: $accent-4;
       transition: all 0.2s;
+
+      img {
+        width: 100%;
+      }
 
       &:hover {
         background-color: $accent-1;
