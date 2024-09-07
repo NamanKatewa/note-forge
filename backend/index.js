@@ -1,3 +1,4 @@
+const compression = require("compression");
 const express = require("express");
 const cors = require("cors");
 const cron = require("node-cron");
@@ -19,6 +20,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
+app.use(compression());
 
 const verificationTask = cron.schedule("*/10 * * * * *", async () => {
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
