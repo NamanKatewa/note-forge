@@ -12,7 +12,7 @@ router.post("/subject", async (req, res) => {
         where: { subjectId },
         orderBy: { deadline: "asc" },
       });
-      if (data) {
+      if (data.length > 0) {
         res.status(200).json(data);
       } else {
         res.status(400).json("Not Found");
@@ -27,11 +27,7 @@ router.post("/subject", async (req, res) => {
 router.post("/add", async (req, res) => {
   const { cookie, title, deadline, subjectId } = req.body;
 
-  const data = await db.session.findFirst({ where: { cookie } });
-
-  if (!data) {
-    res.status(401).json("Unauthorized");
-  } else if (!title) {
+  if (!title) {
     res.status(400).json("Assignment title is required");
   } else if (!deadline) {
     res.status(400).json("Assignment deadline is required");
@@ -39,6 +35,13 @@ router.post("/add", async (req, res) => {
     res.status(400).json("Subject id is required");
   } else {
     try {
+      const data = await db.session.findFirst({
+        where: { cookie },
+        select: { userId: true },
+      });
+      if (!data) {
+        res.status(401).json("Unauthorized");
+      }
       await db.assignment.create({
         data: {
           title,
@@ -58,15 +61,24 @@ router.post("/add", async (req, res) => {
 router.post("/remove", async (req, res) => {
   const { cookie, id } = req.body;
 
-  const data = await db.session.findFirst({ where: { cookie } });
-
-  if (!data) {
-    res.status(401).json("Unauthorized");
+  if (!cookie) {
+    res.status(400).json("Session cookie is required");
   } else if (!id) {
     res.status(400).json("Assignment id is required");
   } else {
     try {
-      const user = await db.user.findUnique({ where: { id: data.userId } });
+      const data = await db.session.findFirst({
+        where: { cookie },
+        select: { userId: true },
+      });
+      if (!data) {
+        res.status(400).json("Unauthorized");
+      }
+
+      const user = await db.user.findUnique({
+        where: { id: data.userId },
+        select: { role: true },
+      });
       if (user.role !== "admin") {
         res.status(401).json("Unauthorized");
       } else {
@@ -90,7 +102,10 @@ router.post("/remove", async (req, res) => {
 router.post("/edit", async (req, res) => {
   const { cookie, id, title, deadline } = req.body;
 
-  const data = await db.session.findFirst({ where: { cookie } });
+  const data = await db.session.findFirst({
+    where: { cookie },
+    select: { userId },
+  });
 
   if (!data) {
     res.status(401).json("Unauthorized");

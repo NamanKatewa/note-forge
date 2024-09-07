@@ -22,6 +22,8 @@ model User{
     resources Resource[] @relation("UserToResource")
     books Book[] @relation("UserToBook")
     createdAt DateTime @default(now())
+
+    @@index([id,name,email])
 }
 
 enum Role{
@@ -44,7 +46,7 @@ model Session{
     user User @relation("UserToSession",fields: [userId],references: [id])
     createdAt DateTime @default(now())
 
-    @@index([userId])
+    @@index([userId,cookie])
 }
 
 model PasswordReset{
@@ -62,6 +64,8 @@ model Subject{
     notes Note[] @relation("SubjectToNote")
     exams Exam[] @relation("SubjectToExam")
     createdAt DateTime @default(now())
+
+    @@index([id])
 }
 
 model Assignment{
@@ -75,8 +79,7 @@ model Assignment{
     solutions Solution[] @relation("AssignmentToSolution")
     createdAt DateTime @default(now())
 
-    @@index([subjectId])
-    @@index([userId])
+    @@index([subjectId,userId,deadline,id])
 }
 
 model Resource{
@@ -113,8 +116,7 @@ model Solution{
     user User @relation("UserToSolution",fields: [userId],references: [id])
     createdAt DateTime @default(now())
 
-    @@index([assignmentId])
-    @@index([userId])
+    @@index([assignmentId,userId])
 }
 
 model Note{
@@ -128,8 +130,7 @@ model Note{
     user User @relation("UserToNote",fields: [userId],references: [id])
     createdAt DateTime @default(now())
 
-    @@index([subjectId])
-    @@index([userId])
+    @@index([subjectId,userId])
 }
 
 model Exam{
@@ -141,7 +142,7 @@ model Exam{
     papers Paper[] @relation("ExamToPaper")
     createdAt DateTime @default(now())
 
-    @@index([subjectId])
+    @@index([subjectId,id,deadline])
 }
 
 model Paper{
@@ -154,6 +155,5 @@ model Paper{
     user User @relation("UserToPaper", fields: [userId], references: [id])
     createdAt DateTime @default(now())
 
-    @@index([examId])
-    @@index([userId])
+    @@index([examId,userId,id])
 }
