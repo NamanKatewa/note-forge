@@ -1,0 +1,238 @@
+@import "../variables.scss";
+
+.navbar {
+    background-color: $background;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: $foreground;
+
+    .container {
+        max-width: 1128px;
+        margin: 0 auto;
+        padding: 0 16px;
+
+        .wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+
+            .left {
+                display: flex;
+                align-items: center;
+
+                .logo {
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    color: $foreground;
+                    text-decoration: none;
+                }
+
+                .links {
+                    display: flex;
+                    margin-left: 2.5rem;
+
+                    @media(max-width:905px) {
+                        display: none;
+                    }
+
+                    .link {
+                        color: $secondary-foreground;
+                        padding: 8px 16px;
+                        text-decoration: none;
+                        font-size: 0.875rem;
+
+                        &:hover {
+                            color: $foreground;
+                        }
+                    }
+                }
+            }
+
+            .right {
+                display: flex;
+                align-items: center;
+
+                @media(max-width:905px) {
+                    display: none;
+                }
+
+                .searchContainer {
+                    position: relative;
+
+                    .searchIcon {
+                        position: absolute;
+                        left: 12px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        color: $muted-foreground;
+                    }
+
+                    .searchInput {
+                        padding-left: 40px;
+                        padding-right: 16px;
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        border: 1px solid $border;
+                        border-radius: $radius;
+                        background-color: $popover;
+                        color: $foreground ;
+
+                        &:focus {
+                            border-color: $primary;
+                            outline: none;
+                        }
+                    }
+                }
+
+                .authButtons {
+                    display: flex;
+                    align-items: center;
+
+                    .authButton {
+                        display: flex;
+                        align-items: center;
+                        color: $secondary-foreground;
+                        padding: 8px 16px;
+                        font-size: 0.875rem;
+                        border: none;
+                        background: none;
+                        cursor: pointer;
+
+                        &:hover {
+                            color: $foreground;
+                        }
+
+                        .icon {
+                            margin-right: 8px;
+                        }
+                    }
+
+                    .signUpButton {
+                        display: flex;
+                        align-items: center;
+                        margin-left: 8px;
+                        background-color: $primary;
+                        color: $primary-foreground;
+                        padding: 8px 16px;
+                        font-size: 0.875rem;
+                        border-radius: $radius;
+                        border: none;
+                        cursor: pointer;
+
+                        &:hover {
+                            background-color: darken($primary, 10%);
+                        }
+
+                        .icon {
+                            margin-right: 8px;
+                        }
+                    }
+                }
+            }
+
+            .mobileMenuButton {
+                display: none;
+
+                @media(max-width:905px) {
+                    display: block;
+                }
+
+                .menuToggle {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: $foreground;
+
+                    .icon {
+                        height: 24px;
+                        width: 24px;
+                    }
+                }
+            }
+        }
+    }
+
+    .mobileMenu {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+
+        .mobileLink {
+            display: block;
+            color: $secondary-foreground;
+            padding: 8px 0;
+            text-decoration: none;
+
+            &:hover {
+                color: $foreground;
+            }
+        }
+
+        .searchContainer {
+            position: relative;
+
+            .searchIcon {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: $muted-foreground;
+            }
+
+            .searchInput {
+                padding-left: 40px;
+                padding-right: 16px;
+                padding-top: 8px;
+                padding-bottom: 8px;
+                border: 1px solid $border;
+                border-radius: $radius;
+                background-color: $popover;
+                color: $foreground ;
+
+                &:focus {
+                    border-color: $primary;
+                    outline: none;
+                }
+            }
+        }
+
+        .mobileAuthButtons {
+            display: flex;
+            flex-direction: column;
+
+            .authButton {
+                width: 100%;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 16px;
+                font-size: 0.875rem;
+                border: none;
+                background-color: $primary;
+                color: $primary-foreground;
+
+                .icon {
+                    margin-right: 6px;
+                }
+            }
+
+            .signUpButton {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 16px;
+                font-size: 0.875rem;
+                border: none;
+                background-color: $primary;
+                color: $primary-foreground;
+
+                .icon {
+                    margin-right: 6px;
+                }
+            }
+        }
+    }
+}
