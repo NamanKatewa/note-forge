@@ -26,7 +26,7 @@ const SignIn = () => {
 
       if (res.status === 200) {
         login(res.data.cookie, res.data.role, res.data.userId);
-        navigate("/subjects");
+        navigate("/");
       }
     } catch (err) {
       if (err.response && err.response.data) {
