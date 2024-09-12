@@ -4,8 +4,10 @@ import { apiRoute } from "../utils";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
+import { FilePen, Trash2 } from "lucide-react";
+import "./BookCard.scss";
 
-const BookCard = ({ data, setRefresh, refresh }) => {
+const BookCard = ({ data, setRefresh, refresh, color }) => {
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState(data.title);
   const [imgUrl, setImgUrl] = useState(data.imgUrl);
@@ -69,20 +71,20 @@ const BookCard = ({ data, setRefresh, refresh }) => {
 
   return (
     <div
-      className="book-card"
+      className={`book-card ${color}`}
       onClick={() => {
         window.open(data.link, "_blank");
       }}
     >
-      <img src={data.imgUrl} alt={`${data.title} cover`} />
-      <h3>{data.title}</h3>
+      <div className="content">
+        <img src={data.imgUrl} alt={`${data.title} cover`} />
+        <h3>{data.title}</h3>
+      </div>
       {authenticated && (
         <div className="actions">
           {role === "admin" && (
             <>
-              <button className="secondary-action-button" onClick={openModal}>
-                Edit
-              </button>
+              <FilePen className="icon" onClick={openModal} />
               <Modal show={showModal} onClose={closeModal}>
                 <label>Title</label>
                 <input
@@ -133,12 +135,7 @@ const BookCard = ({ data, setRefresh, refresh }) => {
                   Cancel
                 </button>
               </Modal>
-              <button
-                className="secondary-action-button"
-                onClick={handleDelete}
-              >
-                Delete
-              </button>
+              <Trash2 className="icon delete" onClick={handleDelete} />
             </>
           )}
         </div>

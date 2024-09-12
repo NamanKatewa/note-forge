@@ -112,13 +112,16 @@ const Resources = () => {
 
       <div className="section-grid">
         {resources &&
-          resources.map((r) => {
+          resources.map((r, index) => {
+            const colors = ["primary", "secondary", "muted", "accent"];
+            const color = colors[index % colors.length];
             return (
               <ResourceCard
                 key={r.id}
                 data={r}
                 setRefresh={setRefresh}
                 refresh={refresh}
+                color={color}
               />
             );
           })}

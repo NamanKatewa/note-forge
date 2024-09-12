@@ -5,6 +5,7 @@ import axios from "axios";
 import { apiRoute } from "../utils";
 import toast from "react-hot-toast";
 import BookCard from "../components/BookCard";
+import "./Books.scss";
 
 const Books = () => {
   const [showModal, setShowModal] = useState(false);
@@ -52,7 +53,7 @@ const Books = () => {
   }, [refresh, authenticated]);
 
   return (
-    <div className="page">
+    <div className="books">
       {authenticated && role === "admin" && (
         <>
           <button className="create-button" onClick={openModal}>
@@ -109,15 +110,18 @@ const Books = () => {
         </>
       )}
 
-      <div className="list">
+      <div className="section-grid">
         {resources &&
-          resources.map((r) => {
+          resources.map((r, index) => {
+            const colors = ["primary", "secondary", "muted", "accent"];
+            const color = colors[index % colors.length];
             return (
               <BookCard
                 key={r.id}
                 data={r}
                 setRefresh={setRefresh}
                 refresh={refresh}
+                color={color}
               />
             );
           })}

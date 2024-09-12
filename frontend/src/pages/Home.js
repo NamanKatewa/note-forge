@@ -3,6 +3,7 @@ import axios from "axios";
 import { apiRoute } from "../utils";
 import { useAuth } from "../auth";
 import SubjectCard from "../components/SubjectCard";
+import "./Home.scss";
 
 function Home() {
   const { getSessionCookie, authenticated } = useAuth();
@@ -26,17 +27,22 @@ function Home() {
   return (
     <div className="home">
       {subjects.length > 0 ? (
-        <>
-          {subjects.map((s) => (
-            <SubjectCard
-              key={s.id}
-              refresh={refresh}
-              setRefresh={setRefresh}
-              data={s}
-              saved={true}
-            />
-          ))}
-        </>
+        <div className="section-grid">
+          {subjects.map((s, index) => {
+            const colors = ["primary", "secondary", "muted", "accent"];
+            const color = colors[index % colors.length];
+            return (
+              <SubjectCard
+                key={s.id}
+                refresh={refresh}
+                setRefresh={setRefresh}
+                data={s}
+                saved={true}
+                color={color}
+              />
+            );
+          })}
+        </div>
       ) : (
         <p>
           {authenticated

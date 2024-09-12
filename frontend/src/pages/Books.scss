@@ -1,0 +1,37 @@
+@import "../variables.scss";
+
+.books {
+    background-color: $background;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .create-button {
+        width: fit-content;
+        background-color: lighten($primary, 10%);
+        color: $foreground;
+        border: none;
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+    }
+
+    .section-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1.5rem;
+        padding: 1rem;
+
+        @media (min-width: 640px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (min-width: 768px) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (min-width: 1024px) {
+            grid-template-columns: repeat(4, 1fr);
+            padding: 1.5rem;
+        }
+    }
+}

@@ -7,7 +7,7 @@ import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./ResourceCard.scss";
 
-const ResourceCard = ({ data, setRefresh, refresh, saved }) => {
+const ResourceCard = ({ data, setRefresh, refresh, color }) => {
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState(data.title);
   const [content, setContent] = useState(data.content);
@@ -71,7 +71,7 @@ const ResourceCard = ({ data, setRefresh, refresh, saved }) => {
 
   return (
     <div
-      className="resource-card primary"
+      className={`resource-card ${color}`}
       onClick={() => {
         window.open(data.link, "_blank");
       }}
