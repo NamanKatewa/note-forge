@@ -118,10 +118,10 @@ const NavbarNew = () => {
           <Link to="/resources" className="mobileLink">
             Resources
           </Link>
-          <Link href="/books" className="mobileLink">
+          <Link to="/books" className="mobileLink">
             Books
           </Link>
-          <Link href="/saved" className="mobileLink">
+          <Link to="/saved" className="mobileLink">
             Saved
           </Link>
           <div className="mobileAuthButtons">

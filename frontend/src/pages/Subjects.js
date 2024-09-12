@@ -5,6 +5,7 @@ import axios from "axios";
 import { apiRoute } from "../utils";
 import toast from "react-hot-toast";
 import SubjectCard from "../components/SubjectCard";
+import "./Subjects.scss";
 
 const Subjects = () => {
   const [showModal, setShowModal] = useState(false);
@@ -58,7 +59,7 @@ const Subjects = () => {
   }, [refresh, authenticated, getSessionCookie]);
 
   return (
-    <div className="page">
+    <div className="subjects">
       {authenticated && role === "admin" && (
         <>
           <button className="create-button" onClick={openModal}>
@@ -88,9 +89,11 @@ const Subjects = () => {
         </>
       )}
 
-      <div className="list">
+      <div className="section-grid">
         {subjects &&
-          subjects.map((s) => {
+          subjects.map((s, index) => {
+            const colors = ["primary", "secondary", "muted", "accent"];
+            const color = colors[index % colors.length];
             const isSaved = savedSubjects.some(
               (savedSubject) => savedSubject.id === s.id
             );
@@ -101,6 +104,7 @@ const Subjects = () => {
                 saved={isSaved}
                 setRefresh={setRefresh}
                 refresh={refresh}
+                color={color}
               />
             );
           })}
