@@ -1,0 +1,64 @@
+@import "../variables.scss";
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: $background;
+        color: $foreground;
+        padding: 10%;
+        border-radius: $radius;
+
+        input {
+            background-color: transparent;
+            border: solid 1px $border;
+            margin: 20px;
+            padding: 10px 25px;
+            color: $foreground;
+            border-radius: $radius;
+            transition: all 0.2s;
+            width: calc(100%);
+
+            &:focus {
+                outline: none;
+                border: solid 1px $foreground;
+            }
+        }
+
+        .primary-action-button {
+            border: solid 1px $border;
+            margin: 20px;
+            padding: 10px 25px;
+            border-radius: $radius;
+            cursor: pointer;
+            color: $foreground;
+            background-color: $primary;
+            transition: background-color 0.2s;
+        }
+
+        .secondary-action-button {
+            border: solid 1px $border;
+            margin: 20px;
+            padding: 10px 25px;
+            border-radius: $radius;
+            cursor: pointer;
+            background-color: transparent;
+            color: $foreground;
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: $primary;
+            }
+        }
+    }
+}
