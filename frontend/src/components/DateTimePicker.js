@@ -25,13 +25,11 @@ const DateTimePicker = ({
   };
 
   return (
-    <div className="date-time-picker">
+    <>
       <label>{text}</label>
-      <div className="date-time">
-        <input type="date" value={date} onChange={handleDateChange} />
-        <input type="time" value={time} onChange={handleTimeChange} />
-      </div>
-    </div>
+      <input type="date" value={date} onChange={handleDateChange} />
+      <input type="time" value={time} onChange={handleTimeChange} />
+    </>
   );
 };
 

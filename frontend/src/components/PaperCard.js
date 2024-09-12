@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
+import { FilePen, Trash2 } from "lucide-react";
+import "./PaperCard.scss";
 
 const PaperCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
@@ -70,21 +72,21 @@ const PaperCard = ({ data, refresh, setRefresh }) => {
 
   return (
     <div className="paper-card">
-      <h4>{data.title}</h4>
-      <a
-        href={data.link}
-        target="_blank"
-        rel="noreferrer"
-        className="primary-action-button"
-      >
-        Download
-      </a>
-      <p>Shared by {data.user.name}</p>
+      <div className="content">
+        <h4>{data.title}</h4>
+        <a
+          href={data.link}
+          target="_blank"
+          rel="noreferrer"
+          className="primary-action-button"
+        >
+          Download
+        </a>
+        <p>Shared by {data.user.name}</p>
+      </div>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
-          <button className="secondary-action-button" onClick={openModal}>
-            Edit
-          </button>
+          <FilePen className="icon" onClick={openModal} />
           <Modal show={showModal} onClose={closeModal}>
             <label>Title</label>
             <input
@@ -117,9 +119,7 @@ const PaperCard = ({ data, refresh, setRefresh }) => {
             </button>
           </Modal>
           {role === "admin" && (
-            <button className="secondary-action-button" onClick={handleDelete}>
-              Delete
-            </button>
+            <Trash2 className="icon delete" onClick={handleDelete} />
           )}
         </div>
       )}

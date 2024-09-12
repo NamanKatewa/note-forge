@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
+import { FilePen, Trash2 } from "lucide-react";
+import "./NoteCard.scss";
 
 const NoteCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
@@ -71,17 +73,14 @@ const NoteCard = ({ data, refresh, setRefresh }) => {
   };
 
   return (
-    <div
-      className="assignment-card"
-      onClick={() => window.open(data.link, "_blank")}
-    >
-      <p> {data.title}</p>
-      <p> {data.content}</p>
+    <div className="note-card" onClick={() => window.open(data.link, "_blank")}>
+      <div className="content">
+        <p> {data.title}</p>
+        <p> {data.content}</p>
+      </div>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
-          <button className="secondary-action-button" onClick={openModal}>
-            Edit
-          </button>
+          <FilePen className="icon" onClick={openModal} />
           <Modal show={showModal} onClose={closeModal}>
             <label>Title</label>
             <input
@@ -130,9 +129,7 @@ const NoteCard = ({ data, refresh, setRefresh }) => {
             </button>
           </Modal>
           {role === "admin" && (
-            <button className="secondary-action-button" onClick={handleDelete}>
-              Delete
-            </button>
+            <Trash2 className="icon delete" onClick={handleDelete} />
           )}
         </div>
       )}

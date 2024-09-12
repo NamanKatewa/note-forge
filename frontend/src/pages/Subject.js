@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import AssignmentCard from "../components/AssignmentCard";
 import ExamCard from "../components/ExamCard";
 import NoteCard from "../components/NoteCard";
+import "./Subject.scss";
 
 const Subject = () => {
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
@@ -175,7 +176,7 @@ const Subject = () => {
       <h1>{name}</h1>
       {authenticated ? (
         <>
-          <div className="createButtons">
+          <div className="create-buttons">
             <button className="create-button" onClick={openAssignmentModal}>
               Add Asignment
             </button>
@@ -351,7 +352,7 @@ const Subject = () => {
       )}
       {pastExams.length > 0 ? (
         <>
-          <h3>Past Exams</h3>
+          <h2>Past Exams</h2>
           {pastExams.map((e) => (
             <ExamCard
               key={e.id}

@@ -6,6 +6,7 @@ import { apiRoute, formatDeadline } from "../utils";
 import Modal from "../components/Modal";
 import toast from "react-hot-toast";
 import SolutionCard from "../components/SolutionCard";
+import "./Assignment.scss";
 
 const Assignment = () => {
   const [detail, setDetail] = useState();
@@ -68,7 +69,7 @@ const Assignment = () => {
       <h3>{detail && detail.title}</h3>
       <p>{detail && formatDeadline(detail.deadline)}</p>
       {authenticated ? (
-        <>
+        <div className="create-buttons">
           <button className="create-button" onClick={openModal}>
             Add Solution
           </button>
@@ -101,7 +102,7 @@ const Assignment = () => {
               Cancel
             </button>
           </Modal>
-        </>
+        </div>
       ) : (
         "Login to add your own solutions"
       )}

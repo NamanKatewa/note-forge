@@ -7,6 +7,8 @@ import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
 import DateTimePicker from "./DateTimePicker";
+import { FilePen, Trash2 } from "lucide-react";
+import "./AssignmentCard.scss";
 
 const AssignmentCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
@@ -78,13 +80,13 @@ const AssignmentCard = ({ data, refresh, setRefresh }) => {
       className="assignment-card"
       onClick={() => navigate(`/assignments/${data.id}`)}
     >
-      <p> {data.title}</p>
-      <p> {formatDeadline(data.deadline)}</p>
+      <div className="content">
+        <p> {data.title}</p>
+        <p> {formatDeadline(data.deadline)}</p>
+      </div>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
-          <button className="secondary-action-button" onClick={openModal}>
-            Edit
-          </button>
+          <FilePen className="icon" onClick={openModal} />
           <Modal show={showModal} onClose={closeModal}>
             <input
               type="text"
@@ -112,9 +114,7 @@ const AssignmentCard = ({ data, refresh, setRefresh }) => {
             </button>
           </Modal>
           {role === "admin" && (
-            <button className="secondary-action-button" onClick={handleDelete}>
-              Delete
-            </button>
+            <Trash2 className="icon delete" onClick={handleDelete} />
           )}
         </div>
       )}

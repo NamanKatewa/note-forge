@@ -6,6 +6,7 @@ import { apiRoute, formatDeadline } from "../utils";
 import Modal from "../components/Modal";
 import toast from "react-hot-toast";
 import PaperCard from "../components/PaperCard";
+import "./Exam.scss";
 
 const Exam = () => {
   const [detail, setDetail] = useState();
@@ -62,12 +63,12 @@ const Exam = () => {
   }, [refresh, examId]);
 
   return (
-    <div className="assignment">
+    <div className="exam">
       <h1>{detail && detail.subject.name}</h1>
       <h3>{detail && detail.title}</h3>
       <p>{detail && formatDeadline(detail.deadline)}</p>
       {authenticated ? (
-        <>
+        <div className="create-buttons">
           <button className="create-button" onClick={openModal}>
             Add Paper
           </button>
@@ -107,7 +108,7 @@ const Exam = () => {
               Cancel
             </button>
           </Modal>
-        </>
+        </div>
       ) : (
         "Login to add your own solutions"
       )}
