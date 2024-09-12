@@ -18,7 +18,7 @@ const NavbarNew = () => {
         <div className="wrapper">
           <div className="left">
             <Link to="/" className="logo">
-              Logo
+              Note Forge
             </Link>
             <div className="links">
               <Link to="/" className="link">

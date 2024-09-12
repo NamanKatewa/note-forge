@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { apiRoute } from "../utils";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
+import "./Search.scss";
 
 const Search = () => {
   const [data, setData] = useState();
@@ -43,12 +44,12 @@ const Search = () => {
           </div>
         )}
       {!isLoading && data.subjects.length > 0 && (
-        <>
+        <div className="grid subjects">
           <h1>Subjects</h1>
           <div className="searchList">
             {data.subjects.map((s) => (
               <div
-                className="searchItem"
+                className="card"
                 key={s.id}
                 onClick={() => navigate(`/subjects/${s.id}/${s.name}`)}
               >
@@ -56,15 +57,15 @@ const Search = () => {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
       {!isLoading && data.assignments.length > 0 && (
-        <>
+        <div className="grid assignments">
           <h1>Assignments</h1>
           <div className="searchList">
             {data.assignments.map((a) => (
               <div
-                className="searchItem"
+                className="card"
                 key={a.id}
                 onClick={() => navigate(`/assignments/${a.id}`)}
               >
@@ -72,15 +73,15 @@ const Search = () => {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
       {!isLoading && data.solutions.length > 0 && (
-        <>
+        <div className="grid solutions">
           <h1>Solutions</h1>
           <div className="searchList">
             {data.solutions.map((s) => (
               <div
-                className="searchItem"
+                className="card"
                 key={s.id}
                 onClick={() => window.open(s.link, "_blank")}
               >
@@ -88,15 +89,15 @@ const Search = () => {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
       {!isLoading && data.notes.length > 0 && (
-        <>
+        <div className="grid notes">
           <h1>Notes</h1>
           <div className="searchList">
             {data.notes.map((n) => (
               <div
-                className="searchItem"
+                className="card"
                 key={n.id}
                 onClick={() => window.open(n.link, "_blank")}
               >
@@ -106,15 +107,15 @@ const Search = () => {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
       {!isLoading && data.exams.length > 0 && (
-        <>
+        <div className="grid exams">
           <h1>Exams</h1>
           <div className="searchList">
             {data.exams.map((e) => (
               <div
-                className="searchItem"
+                className="card"
                 key={e.id}
                 onClick={() => navigate(`/exams/${e.id}`)}
               >
@@ -122,15 +123,15 @@ const Search = () => {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
       {!isLoading && data.papers.length > 0 && (
-        <>
+        <div className="grid papers">
           <h1>Papers</h1>
           <div className="searchList">
             {data.papers.map((e) => (
               <div
-                className="searchItem"
+                className="card"
                 key={e.id}
                 onClick={() => window.open(e.link, "_blank")}
               >
@@ -140,15 +141,15 @@ const Search = () => {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
       {!isLoading && data.resources.length > 0 && (
-        <>
+        <div className="grid resources">
           <h1>Resources</h1>
           <div className="searchList">
             {data.resources.map((e) => (
               <div
-                className="searchItem"
+                className="card"
                 key={e.id}
                 onClick={() => window.open(e.link, "_blank")}
               >
@@ -158,15 +159,15 @@ const Search = () => {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
       {!isLoading && data.books.length > 0 && (
-        <>
+        <div className="grid books">
           <h1>Books</h1>
           <div className="searchList">
             {data.books.map((e) => (
               <div
-                className="searchItem"
+                className="card"
                 key={e.id}
                 onClick={() => window.open(e.link, "_blank")}
               >
@@ -175,7 +176,7 @@ const Search = () => {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
