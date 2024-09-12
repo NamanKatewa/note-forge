@@ -14,10 +14,11 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: $background;
+        background-color: $popover;
         color: $foreground;
         padding: 10%;
         border-radius: $radius;
+        border: 0.15rem solid $primary;
 
         input {
             background-color: transparent;
