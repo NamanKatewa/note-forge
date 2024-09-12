@@ -5,6 +5,7 @@ import axios from "axios";
 import { apiRoute } from "../utils";
 import toast from "react-hot-toast";
 import ResourceCard from "../components/ResourceCard";
+import "./Resources.scss";
 
 const Resources = () => {
   const [showModal, setShowModal] = useState(false);
@@ -52,7 +53,7 @@ const Resources = () => {
   }, [refresh, authenticated]);
 
   return (
-    <div className="page">
+    <div className="resources">
       {authenticated && role === "admin" && (
         <>
           <button className="create-button" onClick={openModal}>
@@ -109,7 +110,7 @@ const Resources = () => {
         </>
       )}
 
-      <div className="list">
+      <div className="section-grid">
         {resources &&
           resources.map((r) => {
             return (

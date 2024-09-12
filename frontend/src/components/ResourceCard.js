@@ -4,6 +4,8 @@ import { apiRoute } from "../utils";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
+import { FilePen, Trash2 } from "lucide-react";
+import "./ResourceCard.scss";
 
 const ResourceCard = ({ data, setRefresh, refresh, saved }) => {
   const [showModal, setShowModal] = useState(false);
@@ -69,21 +71,23 @@ const ResourceCard = ({ data, setRefresh, refresh, saved }) => {
 
   return (
     <div
-      className="subject-card"
+      className="resource-card primary"
       onClick={() => {
         window.open(data.link, "_blank");
       }}
     >
-      <h3>{data.title}</h3>
-      <br />
-      {data.content}
+      <div className="content">
+        <h3>{data.title}</h3>
+        <br />
+        {data.content}
+      </div>
       {authenticated && (
         <div className="actions">
           {role === "admin" && (
             <>
-              <button className="secondary-action-button" onClick={openModal}>
+              <FilePen className="icon" onClick={openModal}>
                 Edit
-              </button>
+              </FilePen>
               <Modal show={showModal} onClose={closeModal}>
                 <label>Title</label>
                 <input
@@ -134,12 +138,9 @@ const ResourceCard = ({ data, setRefresh, refresh, saved }) => {
                   Cancel
                 </button>
               </Modal>
-              <button
-                className="secondary-action-button"
-                onClick={handleDelete}
-              >
+              <Trash2 className="icon delete" onClick={handleDelete}>
                 Delete
-              </button>
+              </Trash2>
             </>
           )}
         </div>
