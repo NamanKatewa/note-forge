@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-// import "./index.scss";
+import "./index.scss";
 import AuthProvider from "./auth";
 import Navbar from "./components/Navbar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
