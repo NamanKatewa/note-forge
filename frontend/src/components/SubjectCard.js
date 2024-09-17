@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -7,12 +6,14 @@ import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
 import { Bookmark, BookmarkCheck, FilePen, Trash2 } from "lucide-react";
 import "./SubjectCard.scss";
+import authStore from "../authStore";
 
 const SubjectCard = ({ data, setRefresh, refresh, saved, color }) => {
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState(data.name);
-  const { authenticated, getSessionCookie, getUserRole } = useAuth();
-  const role = getUserRole();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const role = authStore((state) => state.getUserRole);
   const navigate = useNavigate();
 
   const openModal = (e) => {
@@ -28,7 +29,7 @@ const SubjectCard = ({ data, setRefresh, refresh, saved, color }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/subjects/save`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
       });
 
@@ -49,7 +50,7 @@ const SubjectCard = ({ data, setRefresh, refresh, saved, color }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/subjects/removesave`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
       });
 
@@ -70,7 +71,7 @@ const SubjectCard = ({ data, setRefresh, refresh, saved, color }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/subjects/remove`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
       });
 
@@ -90,7 +91,7 @@ const SubjectCard = ({ data, setRefresh, refresh, saved, color }) => {
   const handleEdit = async () => {
     try {
       const res = await axios.post(`${apiRoute}/subjects/edit`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
         name,
       });

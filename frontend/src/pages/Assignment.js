@@ -1,12 +1,12 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../auth";
 import { apiRoute, formatDeadline } from "../utils";
 import Modal from "../components/Modal";
 import toast from "react-hot-toast";
 import SolutionCard from "../components/SolutionCard";
 import "./Assignment.scss";
+import authStore from "../authStore";
 
 const Assignment = () => {
   const [detail, setDetail] = useState();
@@ -16,7 +16,8 @@ const Assignment = () => {
   const [link, setLink] = useState("");
   const [solutions, setSolutions] = useState([]);
   const { assignmentId } = useParams();
-  const { authenticated, getSessionCookie } = useAuth();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -24,7 +25,7 @@ const Assignment = () => {
   const handleAdd = async () => {
     try {
       const res = await axios.post(`${apiRoute}/solution/add`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         content,
         link,
         assignmentId,

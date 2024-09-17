@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./BookCard.scss";
+import authStore from "../authStore";
 
 const BookCard = ({ data, setRefresh, refresh, color }) => {
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState(data.title);
   const [imgUrl, setImgUrl] = useState(data.imgUrl);
   const [link, setLink] = useState(data.link);
-  const { authenticated, getSessionCookie, getUserRole } = useAuth();
-  const role = getUserRole();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const role = authStore((state) => state.getUserRole);
 
   const openModal = (e) => {
     e.stopPropagation();
@@ -28,7 +29,7 @@ const BookCard = ({ data, setRefresh, refresh, color }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/books/remove`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
       });
 
@@ -48,7 +49,7 @@ const BookCard = ({ data, setRefresh, refresh, color }) => {
   const handleEdit = async () => {
     try {
       const res = await axios.post(`${apiRoute}/books/edit`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
         title,
         imgUrl,

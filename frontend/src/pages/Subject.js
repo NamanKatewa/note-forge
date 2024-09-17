@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../auth";
 import Modal from "../components/Modal";
 import DateTimePicker from "../components/DateTimePicker";
 import axios from "axios";
@@ -10,6 +9,7 @@ import AssignmentCard from "../components/AssignmentCard";
 import ExamCard from "../components/ExamCard";
 import NoteCard from "../components/NoteCard";
 import "./Subject.scss";
+import authStore from "../authStore";
 
 const Subject = () => {
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
@@ -31,7 +31,8 @@ const Subject = () => {
   const [futureExams, setExamFuture] = useState([]);
   const [pastExams, setExamPast] = useState([]);
   const [notes, setNotes] = useState([]);
-  const { authenticated, getSessionCookie } = useAuth();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
   const { subjectId, name } = useParams();
 
   const openAssignmentModal = () => setShowAssignmentModal(true);
@@ -54,7 +55,7 @@ const Subject = () => {
     } else {
       try {
         const res = await axios.post(`${apiRoute}/assignments/add`, {
-          cookie: getSessionCookie(),
+          cookie: sessionCookie,
           title: assignmentTitle,
           deadline: assignmentDateTime,
           subjectId,
@@ -80,7 +81,7 @@ const Subject = () => {
     } else {
       try {
         const res = await axios.post(`${apiRoute}/exams/add`, {
-          cookie: getSessionCookie(),
+          cookie: sessionCookie,
           title: examTitle,
           deadline: examDateTime,
           subjectId,
@@ -103,7 +104,7 @@ const Subject = () => {
   const handleAddNote = async () => {
     try {
       const res = await axios.post(`${apiRoute}/notes/add`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         title: noteTitle,
         content: noteContent,
         link: noteLink,

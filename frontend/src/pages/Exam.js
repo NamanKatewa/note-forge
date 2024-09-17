@@ -1,12 +1,12 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../auth";
 import { apiRoute, formatDeadline } from "../utils";
 import Modal from "../components/Modal";
 import toast from "react-hot-toast";
 import PaperCard from "../components/PaperCard";
 import "./Exam.scss";
+import authStore from "../authStore";
 
 const Exam = () => {
   const [detail, setDetail] = useState();
@@ -16,7 +16,8 @@ const Exam = () => {
   const [link, setLink] = useState("");
   const [papers, setPapers] = useState([]);
   const { examId } = useParams();
-  const { authenticated, getSessionCookie } = useAuth();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -24,7 +25,7 @@ const Exam = () => {
   const handleAdd = async () => {
     try {
       const res = await axios.post(`${apiRoute}/papers/add`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         title,
         link,
         examId,

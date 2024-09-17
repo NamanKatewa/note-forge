@@ -3,21 +3,22 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { formatDateTime, formatDeadline } from "../utils";
-import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
 import DateTimePicker from "./DateTimePicker";
 import { FilePen, Trash2 } from "lucide-react";
 import "./ExamCard.scss";
+import authStore from "../authStore";
 
 const ExamCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState(data.title);
   const [deadline, setDeadline] = useState("");
-  const { getUserRole, authenticated, getSessionCookie, getUserId } = useAuth();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const role = authStore((state) => state.getUserRole);
   const { formattedDate, formattedTime } = formatDateTime(data.deadline);
-  const role = getUserRole();
-  const id = getUserId();
+  const id = authStore((state) => state.getUserId);
   const navigate = useNavigate();
 
   const openModal = (e) => {
@@ -33,7 +34,7 @@ const ExamCard = ({ data, refresh, setRefresh }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/exams/edit`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
         title,
         deadline,
@@ -57,7 +58,7 @@ const ExamCard = ({ data, refresh, setRefresh }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/exams/remove`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
       });
 

@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../auth";
 import Modal from "../components/Modal";
 import axios from "axios";
 import { apiRoute } from "../utils";
 import toast from "react-hot-toast";
 import SubjectCard from "../components/SubjectCard";
 import "./Subjects.scss";
+import authStore from "../authStore";
 
 const Subjects = () => {
   const [showModal, setShowModal] = useState(false);
-  const { authenticated, getSessionCookie, getUserRole } = useAuth();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
   const [name, setName] = useState("");
   const [subjects, setSubjects] = useState([]);
   const [savedSubjects, setSavedSubjects] = useState([]);
   const [refresh, setRefresh] = useState(false);
-  const role = getUserRole();
+  const role = authStore((state) => state.getUserRole);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -22,7 +23,7 @@ const Subjects = () => {
   const handleCreate = async () => {
     try {
       const res = await axios.post(`${apiRoute}/subjects/add`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         name,
       });
 
@@ -48,7 +49,7 @@ const Subjects = () => {
 
     const getSavedSubjects = async () => {
       const res = await axios.post(`${apiRoute}/subjects/getsaved`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
       });
       setSavedSubjects(res.data.subjects);
     };
@@ -56,7 +57,7 @@ const Subjects = () => {
     if (authenticated) {
       getSavedSubjects();
     }
-  }, [refresh, authenticated, getSessionCookie]);
+  }, [refresh, authenticated, sessionCookie]);
 
   return (
     <div className="subjects">

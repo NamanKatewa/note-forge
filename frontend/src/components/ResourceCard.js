@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./ResourceCard.scss";
+import authStore from "../authStore";
 
 const ResourceCard = ({ data, setRefresh, refresh, color }) => {
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState(data.title);
   const [content, setContent] = useState(data.content);
   const [link, setLink] = useState(data.link);
-  const { authenticated, getSessionCookie, getUserRole } = useAuth();
-  const role = getUserRole();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const role = authStore((state) => state.getUserRole);
 
   const openModal = (e) => {
     e.stopPropagation();
@@ -28,7 +29,7 @@ const ResourceCard = ({ data, setRefresh, refresh, color }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/resources/remove`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
       });
 
@@ -48,7 +49,7 @@ const ResourceCard = ({ data, setRefresh, refresh, color }) => {
   const handleEdit = async () => {
     try {
       const res = await axios.post(`${apiRoute}/resources/edit`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
         title,
         content,

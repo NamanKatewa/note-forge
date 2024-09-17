@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../auth";
 import axios from "axios";
 import { apiRoute } from "../utils";
 import { Menu, X, Search, User, LogIn, LogOut } from "lucide-react";
 import "./Navbar.scss";
+import authStore from "../authStore";
 
 const NavbarNew = () => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const { authenticated, getSessionCookie, logout } = useAuth();
+  const authenticated = authStore((state) => state.authenticated);
+  const logout = authStore((state) => state.logout);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
   const navigate = useNavigate();
 
   return (
@@ -55,7 +57,7 @@ const NavbarNew = () => {
                 <button
                   onClick={() => {
                     axios.post(`${apiRoute}/auth/logout`, {
-                      cookie: getSessionCookie(),
+                      cookie: sessionCookie,
                     });
                     logout();
                   }}
@@ -129,7 +131,7 @@ const NavbarNew = () => {
               <button
                 onClick={() => {
                   axios.post(`${apiRoute}/auth/logout`, {
-                    cookie: getSessionCookie(),
+                    cookie: sessionCookie,
                   });
                   logout();
                 }}

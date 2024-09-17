@@ -7,12 +7,13 @@ import { useAuth } from "../auth";
 import Loader from "../components/Loader";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import "./SignIn.scss";
+import authStore from "../authStore";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const login = authStore((state) => state.login);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {

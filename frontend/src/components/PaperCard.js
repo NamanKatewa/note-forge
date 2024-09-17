@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import { useAuth } from "../auth";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./PaperCard.scss";
+import authStore from "../authStore";
 
 const PaperCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState(data.title);
   const [link, setLink] = useState(data.link);
-  const { authenticated, getUserId, getUserRole, getSessionCookie } = useAuth();
-  const role = getUserRole();
-  const id = getUserId();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const role = authStore((state) => state.getUserRole);
+  const id = authStore((state) => state.getUserId);
 
   const openModal = (e) => {
     e.stopPropagation();
@@ -28,7 +29,7 @@ const PaperCard = ({ data, refresh, setRefresh }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/papers/edit`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
         link,
         title,
@@ -52,7 +53,7 @@ const PaperCard = ({ data, refresh, setRefresh }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/papers/remove`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
       });
 

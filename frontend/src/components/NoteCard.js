@@ -1,20 +1,21 @@
 import React, { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useAuth } from "../auth";
 import { apiRoute } from "../utils";
 import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./NoteCard.scss";
+import authStore from "../authStore";
 
 const NoteCard = ({ data, refresh, setRefresh }) => {
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState(data.title);
   const [content, setContent] = useState(data.content);
   const [link, setLink] = useState(data.link);
-  const { getUserRole, authenticated, getSessionCookie, getUserId } = useAuth();
-  const role = getUserRole();
-  const id = getUserId();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const role = authStore((state) => state.getUserRole);
+  const id = authStore((state) => state.getUserId);
 
   const openModal = (e) => {
     e.stopPropagation();
@@ -29,7 +30,7 @@ const NoteCard = ({ data, refresh, setRefresh }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/notes/edit`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
         title,
         content,
@@ -54,7 +55,7 @@ const NoteCard = ({ data, refresh, setRefresh }) => {
     e.stopPropagation();
     try {
       const res = await axios.post(`${apiRoute}/notes/remove`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         id: data.id,
       });
 

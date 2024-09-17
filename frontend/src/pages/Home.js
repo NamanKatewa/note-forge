@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { apiRoute } from "../utils";
-import { useAuth } from "../auth";
 import SubjectCard from "../components/SubjectCard";
 import "./Home.scss";
+import authStore from "../authStore";
 
 function Home() {
-  const { getSessionCookie, authenticated } = useAuth();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
   const [subjects, setSubjects] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
@@ -14,7 +15,7 @@ function Home() {
     const getSubjects = async () => {
       try {
         const res = await axios.post(`${apiRoute}/subjects/getsaved`, {
-          cookie: getSessionCookie(),
+          cookie: sessionCookie,
         });
         setSubjects(res.data.subjects);
       } catch (err) {
@@ -22,7 +23,7 @@ function Home() {
       }
     };
     getSubjects();
-  }, [refresh, getSessionCookie]);
+  }, [refresh, sessionCookie]);
 
   return (
     <div className="home">

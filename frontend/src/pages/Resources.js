@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../auth";
 import Modal from "../components/Modal";
 import axios from "axios";
 import { apiRoute } from "../utils";
 import toast from "react-hot-toast";
 import ResourceCard from "../components/ResourceCard";
 import "./Resources.scss";
+import authStore from "../authStore";
 
 const Resources = () => {
   const [showModal, setShowModal] = useState(false);
-  const { authenticated, getSessionCookie, getUserRole } = useAuth();
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [link, setLink] = useState("");
   const [resources, setResources] = useState([]);
   const [refresh, setRefresh] = useState(false);
-  const role = getUserRole();
+  const role = authStore((state) => state.getUserRole);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -23,7 +24,7 @@ const Resources = () => {
   const handleCreate = async () => {
     try {
       const res = await axios.post(`${apiRoute}/resources/add`, {
-        cookie: getSessionCookie(),
+        cookie: sessionCookie,
         title,
         content,
         link,
