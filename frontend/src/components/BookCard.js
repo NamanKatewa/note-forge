@@ -6,69 +6,55 @@ import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./BookCard.scss";
 import authStore from "../authStore";
+import modalStore from "../modalStore";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 
-const BookCard = ({ data, setRefresh, refresh, color }) => {
-  const [showModal, setShowModal] = useState(false);
+const BookCard = ({ data, color }) => {
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
+  const role = authStore((state) => state.getUserRole());
   const [title, setTitle] = useState(data.title);
   const [imgUrl, setImgUrl] = useState(data.imgUrl);
   const [link, setLink] = useState(data.link);
-  const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
-  const role = authStore((state) => state.getUserRole);
+  const queryClient = useQueryClient();
 
-  const openModal = (e) => {
-    e.stopPropagation();
-    setShowModal(true);
-  };
-  const closeModal = (e) => {
-    e.stopPropagation();
-    setShowModal(false);
-  };
-
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/books/remove`, {
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/books/remove`, {
         cookie: sessionCookie,
         id: data.id,
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["books"]);
+      toast.success("Book Removed");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-      if (res.status === 200) {
-        setRefresh(!refresh);
-        toast.success(res.data);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  const handleEdit = async () => {
-    try {
-      const res = await axios.post(`${apiRoute}/books/edit`, {
+  const editMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/books/edit`, {
         cookie: sessionCookie,
         id: data.id,
         title,
         imgUrl,
         link,
       });
-
-      if (res.status === 200) {
-        setRefresh(!refresh);
-        toast.success(res.data);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["books"]);
+      closeModal(`editBook${data.id}`);
+      toast.success("Book Edited");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
   return (
     <div
@@ -85,8 +71,14 @@ const BookCard = ({ data, setRefresh, refresh, color }) => {
         <div className="actions">
           {role === "admin" && (
             <>
-              <FilePen className="icon" onClick={openModal} />
-              <Modal show={showModal} onClose={closeModal}>
+              <FilePen
+                className="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openModal(`editBook${data.id}`);
+                }}
+              />
+              <Modal id={`editBook${data.id}`}>
                 <label>Title</label>
                 <input
                   type="text"
@@ -96,9 +88,10 @@ const BookCard = ({ data, setRefresh, refresh, color }) => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleEdit();
+                      editMutation.mutate();
                     }
                   }}
+                  autoFocus={true}
                 />
                 <label>Image</label>
                 <input
@@ -109,7 +102,7 @@ const BookCard = ({ data, setRefresh, refresh, color }) => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleEdit();
+                      editMutation.mutate();
                     }
                   }}
                 />
@@ -122,21 +115,31 @@ const BookCard = ({ data, setRefresh, refresh, color }) => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleEdit();
+                      editMutation.mutate();
                     }
                   }}
                 />
-                <button className="primary-action-button" onClick={handleEdit}>
-                  Save Changes
+                <button
+                  className="primary-action-button"
+                  onClick={() => editMutation.mutate()}
+                  disabled={editMutation.isPending}
+                >
+                  {editMutation.isPending ? "Saving..." : "Save Changes"}
                 </button>
                 <button
                   className="secondary-action-button"
-                  onClick={closeModal}
+                  onClick={() => closeModal(`editBook${data.id}`)}
                 >
                   Cancel
                 </button>
               </Modal>
-              <Trash2 className="icon delete" onClick={handleDelete} />
+              <Trash2
+                className="icon delete"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteMutation.mutate();
+                }}
+              />
             </>
           )}
         </div>

@@ -9,72 +9,56 @@ import DateTimePicker from "./DateTimePicker";
 import { FilePen, Trash2 } from "lucide-react";
 import "./ExamCard.scss";
 import authStore from "../authStore";
+import modalStore from "../modalStore";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 
-const ExamCard = ({ data, refresh, setRefresh }) => {
-  const [showModal, setShowModal] = useState(false);
+const ExamCard = ({ data }) => {
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
+  const role = authStore((state) => state.getUserRole());
+  const id = authStore((state) => state.getUserId());
   const [title, setTitle] = useState(data.title);
   const [deadline, setDeadline] = useState("");
-  const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
-  const role = authStore((state) => state.getUserRole);
   const { formattedDate, formattedTime } = formatDateTime(data.deadline);
-  const id = authStore((state) => state.getUserId);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const openModal = (e) => {
-    e.stopPropagation();
-    setShowModal(true);
-  };
-  const closeModal = (e) => {
-    e.stopPropagation();
-    setShowModal(false);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/exams/remove`, {
+        cookie: sessionCookie,
+        id: data.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["exams"]);
+      toast.success("Exam Removed");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-  const handleEdit = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/exams/edit`, {
+  const editMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/exams/edit`, {
         cookie: sessionCookie,
         id: data.id,
         title,
         deadline,
       });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/exams/remove`, {
-        cookie: sessionCookie,
-        id: data.id,
-      });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["exams"]);
+      closeModal(`editExam${data.id}`);
+      toast.success("Exam Edited");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
   return (
     <div className="exam-card" onClick={() => navigate(`/exams/${data.id}`)}>
@@ -84,8 +68,14 @@ const ExamCard = ({ data, refresh, setRefresh }) => {
       </div>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
-          <FilePen className="icon" onClick={openModal} />
-          <Modal show={showModal} onClose={closeModal}>
+          <FilePen
+            className="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              openModal(`editExam${data.id}`);
+            }}
+          />
+          <Modal id={`editExam${data.id}`}>
             <input
               type="text"
               value={title}
@@ -94,7 +84,7 @@ const ExamCard = ({ data, refresh, setRefresh }) => {
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
             />
@@ -104,15 +94,28 @@ const ExamCard = ({ data, refresh, setRefresh }) => {
               initialDate={formattedDate}
               initialTime={formattedTime}
             />
-            <button className="primary-action-button" onClick={handleEdit}>
-              Save
+            <button
+              className="primary-action-button"
+              onClick={() => editMutation.mutate()}
+              disabled={editMutation.isPending}
+            >
+              {editMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
-            <button className="secondary-action-button" onClick={closeModal}>
+            <button
+              className="secondary-action-button"
+              onClick={() => closeModal(`editSubject${data.id}`)}
+            >
               Cancel
             </button>
           </Modal>
           {role === "admin" && (
-            <Trash2 className="icon delete" onClick={handleDelete} />
+            <Trash2
+              className="icon delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteMutation.mutate();
+              }}
+            />
           )}
         </div>
       )}

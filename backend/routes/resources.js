@@ -5,7 +5,14 @@ const { isValidUrl } = require("../lib/url");
 
 router.get("/all", async (req, res) => {
   try {
-    const data = await db.resource.findMany();
+    const data = await db.resource.findMany({
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        link: true,
+      },
+    });
     res.status(200).json(data);
   } catch (err) {
     console.error("Error fetching resources: ", err);

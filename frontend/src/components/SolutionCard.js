@@ -6,70 +6,54 @@ import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./SolutionCard.scss";
 import authStore from "../authStore";
+import modalStore from "../modalStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const SolutionCard = ({ data, refresh, setRefresh }) => {
-  const [showModal, setShowModal] = useState(false);
+const SolutionCard = ({ data }) => {
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
+  const role = authStore((state) => state.getUserRole());
+  const id = authStore((state) => state.getUserId());
   const [content, setContent] = useState(data.content);
   const [link, setLink] = useState(data.link);
-  const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
-  const role = authStore((state) => state.getUserRole);
-  const id = authStore((state) => state.getUserId);
+  const queryClient = useQueryClient();
 
-  const openModal = (e) => {
-    e.stopPropagation();
-    setShowModal(true);
-  };
-  const closeModal = (e) => {
-    e.stopPropagation();
-    setShowModal(false);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/solution/remove`, {
+        cookie: sessionCookie,
+        id: data.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["solutions"]);
+      toast.success("Solution Removed");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-  const handleEdit = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/solution/edit`, {
+  const editMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/solution/edit`, {
         cookie: sessionCookie,
         id: data.id,
         link,
         content,
       });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/solution/remove`, {
-        cookie: sessionCookie,
-        id: data.id,
-      });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["solutions"]);
+      closeModal(`editSolution${data.id}`);
+      toast.success("Solution Edited");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
   return (
     <div className="solution-card">
@@ -87,15 +71,21 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
       </div>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
-          <FilePen className="icon" onClick={openModal} />
-          <Modal show={showModal} onClose={closeModal}>
+          <FilePen
+            className="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              openModal(`editSolution${data.id}`);
+            }}
+          />
+          <Modal id={`editSolution${data.id}`}>
             <input
               type="text"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
               autoFocus={true}
@@ -106,19 +96,32 @@ const SolutionCard = ({ data, refresh, setRefresh }) => {
               onChange={(e) => setLink(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
             />
-            <button className="primary-action-button" onClick={handleEdit}>
-              Save
+            <button
+              className="primary-action-button"
+              onClick={() => editMutation.mutate()}
+              disabled={editMutation.isPending}
+            >
+              {editMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
-            <button className="secondary-action-button" onClick={closeModal}>
+            <button
+              className="secondary-action-button"
+              onClick={() => closeModal(`editSolution${data.id}`)}
+            >
               Cancel
             </button>
           </Modal>
           {role === "admin" && (
-            <Trash2 className="icon delete" onClick={handleDelete} />
+            <Trash2
+              className="icon delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteMutation.mutate();
+              }}
+            />
           )}
         </div>
       )}

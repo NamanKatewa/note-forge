@@ -11,7 +11,7 @@ const NavbarNew = () => {
   const [isOpen, setIsOpen] = useState(false);
   const authenticated = authStore((state) => state.authenticated);
   const logout = authStore((state) => state.logout);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
   const navigate = useNavigate();
 
   return (

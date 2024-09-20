@@ -4,7 +4,9 @@ const db = require("../db");
 
 router.get("/all", async (req, res) => {
   try {
-    const data = await db.subject.findMany();
+    const data = await db.subject.findMany({
+      select: { id: true, name: true },
+    });
     res.status(200).json(data);
   } catch (err) {
     console.error("Error fetching subjects: ", err);
@@ -200,9 +202,16 @@ router.post("/getsaved", async (req, res) => {
     try {
       subjects = await db.user.findUnique({
         where: { id: data.userId },
-        include: { subjects: true },
+        select: {
+          subjects: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
-      res.status(200).json(subjects);
+      res.status(200).json(subjects.subjects);
     } catch (err) {
       console.error("Error fetching subjects for user: ", err);
       res.status(500).json("Internal Server Error");

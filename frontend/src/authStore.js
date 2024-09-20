@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import Cookies from "js-cookie";
 
-const authStore = create((set, get) => ({
-  authenticated: false,
+const authStore = create((set) => ({
+  authenticated: !!Cookies.get("session") && !!Cookies.get("userId"),
 
   checkAuth: () => {
     const session = Cookies.get("session");
@@ -14,30 +14,18 @@ const authStore = create((set, get) => ({
   },
 
   getSessionCookie: () => {
-    if (get().authenticated) {
-      const session = Cookies.get("session");
-      return session || null;
-    }
-    set({ authenticated: false });
-    return false;
+    const session = Cookies.get("session");
+    return session || null;
   },
 
   getUserRole: () => {
-    if (get().authenticated) {
-      const userRole = Cookies.get("role");
-      return userRole || null;
-    }
-    set({ authenticated: false });
-    return false;
+    const userRole = Cookies.get("role");
+    return userRole || null;
   },
 
   getUserId: () => {
-    if (get().authenticated) {
-      const userId = Cookies.get("userId");
-      return userId || null;
-    }
-    set({ authenticated: false });
-    return false;
+    const userId = Cookies.get("userId");
+    return userId || null;
   },
 
   login: (token, role, userId) => {

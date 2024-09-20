@@ -1,86 +1,73 @@
-import React, { useEffect, useState } from "react";
+import "./Subjects.scss";
+import { useState } from "react";
 import Modal from "../components/Modal";
 import axios from "axios";
 import { apiRoute } from "../utils";
 import toast from "react-hot-toast";
 import SubjectCard from "../components/SubjectCard";
-import "./Subjects.scss";
 import authStore from "../authStore";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Loader from "../components/Loader";
+import modalStore from "../modalStore";
 
 const Subjects = () => {
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
+  const role = authStore((state) => state.getUserRole());
+  const [name, setName] = useState("");
+  const queryClient = useQueryClient();
+
   const subjectsQuery = useQuery({
     queryKey: ["subjects"],
     queryFn: () => {
-      setTimeout(1000);
       return axios.get(`${apiRoute}/subjects/all`);
     },
   });
 
-  const [showModal, setShowModal] = useState(false);
-  const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
-  const [name, setName] = useState("");
-  const [subjects, setSubjects] = useState([]);
-  const [savedSubjects, setSavedSubjects] = useState([]);
-  const [refresh, setRefresh] = useState(false);
-  const role = authStore((state) => state.getUserRole);
-
-  const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
-
-  const handleCreate = async () => {
-    try {
-      const res = await axios.post(`${apiRoute}/subjects/add`, {
-        cookie: sessionCookie,
-        name,
-      });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        closeModal();
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  useEffect(() => {
-    const getSubjects = async () => {
-      const res = await axios.get(`${apiRoute}/subjects/all`);
-      setSubjects(res.data);
-    };
-
-    const getSavedSubjects = async () => {
-      const res = await axios.post(`${apiRoute}/subjects/getsaved`, {
+  const savedSubjectsQuery = useQuery({
+    queryKey: ["savedSubjects"],
+    queryFn: () => {
+      return axios.post(`${apiRoute}/subjects/getsaved`, {
         cookie: sessionCookie,
       });
-      setSavedSubjects(res.data.subjects);
-    };
-    getSubjects();
-    if (authenticated) {
-      getSavedSubjects();
-    }
-  }, [refresh, authenticated, sessionCookie]);
+    },
+    enabled: authenticated,
+  });
 
-  if (subjectsQuery.isLoading) return <Loader />;
-  else if (subjectsQuery.isError) {
-    window.location.reload();
-  } else
+  const subjectMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/subjects/add`, {
+        cookie: sessionCookie,
+        name: name,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["subjects"]);
+      closeModal("createSubject");
+      toast.success("Subject Added");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
+
+  if (subjectsQuery.isLoading || savedSubjectsQuery.isLoading)
+    return <Loader />;
+  else
     return (
       <div className="subjects">
         {authenticated && role === "admin" && (
           <>
-            <button className="create-button" onClick={openModal}>
+            <button
+              className="create-button"
+              onClick={() => openModal("createSubject")}
+            >
               Create Subject
             </button>
-            <Modal show={showModal} onClose={closeModal}>
+            <Modal id="createSubject">
+              <label>Name</label>
               <input
                 type="text"
                 onChange={(e) => {
@@ -88,16 +75,23 @@ const Subjects = () => {
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    handleCreate();
+                    subjectMutation.mutate();
                   }
                 }}
                 placeholder="Subject name"
                 autoFocus={true}
               />
-              <button onClick={handleCreate} className="primary-action-button">
-                Create
+              <button
+                onClick={() => subjectMutation.mutate()}
+                className="primary-action-button"
+                disabled={subjectMutation.isPending}
+              >
+                {subjectMutation.isPending ? "Creating..." : "Create"}
               </button>
-              <button className="secondary-action-button" onClick={closeModal}>
+              <button
+                className="secondary-action-button"
+                onClick={() => closeModal("createSubject")}
+              >
                 Cancel
               </button>
             </Modal>
@@ -109,7 +103,7 @@ const Subjects = () => {
             subjectsQuery.data.data.map((s, index) => {
               const colors = ["primary", "secondary", "muted", "accent"];
               const color = colors[index % colors.length];
-              const isSaved = savedSubjects.some(
+              const isSaved = savedSubjectsQuery.data?.data.some(
                 (savedSubject) => savedSubject.id === s.id
               );
               return (
@@ -117,8 +111,6 @@ const Subjects = () => {
                   key={s.id}
                   data={s}
                   saved={isSaved}
-                  setRefresh={setRefresh}
-                  refresh={refresh}
                   color={color}
                 />
               );

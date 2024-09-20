@@ -5,7 +5,9 @@ const { isValidCatboxUrl } = require("../lib/url");
 
 router.get("/all", async (req, res) => {
   try {
-    const data = await db.book.findMany();
+    const data = await db.book.findMany({
+      select: { id: true, title: true, imgUrl: true, link: true },
+    });
     res.status(200).json(data);
   } catch (err) {
     console.error("Error fetching books: ", err);
@@ -43,9 +45,6 @@ router.post("/add", async (req, res) => {
               title,
               imgUrl,
               link,
-              user: {
-                connect: { id: user.id },
-              },
             },
           });
           res.status(200).json("Book Created");

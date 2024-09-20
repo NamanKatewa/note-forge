@@ -6,70 +6,54 @@ import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./PaperCard.scss";
 import authStore from "../authStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import modalStore from "../modalStore";
 
-const PaperCard = ({ data, refresh, setRefresh }) => {
-  const [showModal, setShowModal] = useState(false);
+const PaperCard = ({ data }) => {
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
   const [title, setTitle] = useState(data.title);
   const [link, setLink] = useState(data.link);
   const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
-  const role = authStore((state) => state.getUserRole);
-  const id = authStore((state) => state.getUserId);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
+  const role = authStore((state) => state.getUserRole());
+  const id = authStore((state) => state.getUserId());
+  const queryClient = useQueryClient();
 
-  const openModal = (e) => {
-    e.stopPropagation();
-    setShowModal(true);
-  };
-  const closeModal = (e) => {
-    e.stopPropagation();
-    setShowModal(false);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/papers/remove`, {
+        cookie: sessionCookie,
+        id: data.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["papers"]);
+      toast.success("Paper Removed");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-  const handleEdit = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/papers/edit`, {
+  const editMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/papers/edit`, {
         cookie: sessionCookie,
         id: data.id,
         link,
         title,
       });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/papers/remove`, {
-        cookie: sessionCookie,
-        id: data.id,
-      });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["papers"]);
+      closeModal(`editPaper${data.id}`);
+      toast.success("Paper Edited");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
   return (
     <div className="paper-card">
@@ -87,8 +71,14 @@ const PaperCard = ({ data, refresh, setRefresh }) => {
       </div>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
-          <FilePen className="icon" onClick={openModal} />
-          <Modal show={showModal} onClose={closeModal}>
+          <FilePen
+            className="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              openModal(`editPaper${data.id}`);
+            }}
+          />
+          <Modal id={`editPaper${data.id}`}>
             <label>Title</label>
             <input
               type="text"
@@ -96,7 +86,7 @@ const PaperCard = ({ data, refresh, setRefresh }) => {
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
               autoFocus={true}
@@ -108,19 +98,32 @@ const PaperCard = ({ data, refresh, setRefresh }) => {
               onChange={(e) => setLink(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
             />
-            <button className="primary-action-button" onClick={handleEdit}>
-              Save
+            <button
+              className="primary-action-button"
+              onClick={() => editMutation.mutate()}
+              disabled={editMutation.isPending}
+            >
+              {editMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
-            <button className="secondary-action-button" onClick={closeModal}>
+            <button
+              className="secondary-action-button"
+              onClick={() => closeModal(`editPaper${data.id}`)}
+            >
               Cancel
             </button>
           </Modal>
           {role === "admin" && (
-            <Trash2 className="icon delete" onClick={handleDelete} />
+            <Trash2
+              className="icon delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteMutation.mutate();
+              }}
+            />
           )}
         </div>
       )}

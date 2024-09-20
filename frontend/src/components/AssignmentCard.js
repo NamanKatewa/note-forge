@@ -9,72 +9,56 @@ import Modal from "./Modal";
 import DateTimePicker from "./DateTimePicker";
 import { FilePen, Trash2 } from "lucide-react";
 import "./AssignmentCard.scss";
+import modalStore from "../modalStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const AssignmentCard = ({ data, refresh, setRefresh }) => {
-  const [showModal, setShowModal] = useState(false);
+const AssignmentCard = ({ data }) => {
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
+  const authenticated = authStore((state) => state.authenticated);
+  const role = authStore((state) => state.getUserRole());
+  const id = authStore((state) => state.getUserId());
   const [title, setTitle] = useState(data.title);
   const [deadline, setDeadline] = useState("");
   const { formattedDate, formattedTime } = formatDateTime(data.deadline);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
-  const authenticated = authStore((state) => state.authenticated);
-  const role = authStore((state) => state.getUserRole);
-  const id = authStore((state) => state.getUserId);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const openModal = (e) => {
-    e.stopPropagation();
-    setShowModal(true);
-  };
-  const closeModal = (e) => {
-    e.stopPropagation();
-    setShowModal(false);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/assignments/remove`, {
+        cookie: sessionCookie,
+        id: data.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["assignments"]);
+      toast.success("Assignment Removed");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-  const handleEdit = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/assignments/edit`, {
+  const editMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/assignments/edit`, {
         cookie: sessionCookie,
         id: data.id,
         title,
         deadline,
       });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/assignments/remove`, {
-        cookie: sessionCookie,
-        id: data.id,
-      });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["assignments"]);
+      closeModal(`editAssignment${data.id}`);
+      toast.success("Assignment Edited");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
   return (
     <div
@@ -87,8 +71,14 @@ const AssignmentCard = ({ data, refresh, setRefresh }) => {
       </div>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
-          <FilePen className="icon" onClick={openModal} />
-          <Modal show={showModal} onClose={closeModal}>
+          <FilePen
+            className="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              openModal(`editAssignment${data.id}`);
+            }}
+          />
+          <Modal id={`editAssignment${data.id}`}>
             <input
               type="text"
               value={title}
@@ -97,9 +87,10 @@ const AssignmentCard = ({ data, refresh, setRefresh }) => {
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
+              autoFocus={true}
             />
             <DateTimePicker
               onDateTimeChange={setDeadline}
@@ -107,15 +98,28 @@ const AssignmentCard = ({ data, refresh, setRefresh }) => {
               initialDate={formattedDate}
               initialTime={formattedTime}
             />
-            <button className="primary-action-button" onClick={handleEdit}>
-              Save
+            <button
+              className="primary-action-button"
+              onClick={() => editMutation.mutate()}
+              disabled={editMutation.isPending}
+            >
+              {editMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
-            <button className="secondary-action-button" onClick={closeModal}>
+            <button
+              className="secondary-action-button"
+              onClick={() => closeModal(`editAssignment${data.id}`)}
+            >
               Cancel
             </button>
           </Modal>
           {role === "admin" && (
-            <Trash2 className="icon delete" onClick={handleDelete} />
+            <Trash2
+              className="icon delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteMutation.mutate();
+              }}
+            />
           )}
         </div>
       )}

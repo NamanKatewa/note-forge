@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiRoute, formatDeadline } from "../utils";
 import Modal from "../components/Modal";
@@ -7,122 +7,123 @@ import toast from "react-hot-toast";
 import SolutionCard from "../components/SolutionCard";
 import "./Assignment.scss";
 import authStore from "../authStore";
+import modalStore from "../modalStore";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Loader from "../components/Loader";
 
 const Assignment = () => {
-  const [detail, setDetail] = useState();
-  const [refresh, setRefresh] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
   const [content, setContent] = useState("");
   const [link, setLink] = useState("");
-  const [solutions, setSolutions] = useState([]);
   const { assignmentId } = useParams();
-  const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const queryClient = useQueryClient();
 
-  const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
+  const detailQuery = useQuery({
+    queryKey: ["assignment"],
+    queryFn: () => {
+      return axios.post(`${apiRoute}/assignments/detail`, {
+        id: assignmentId,
+      });
+    },
+  });
 
-  const handleAdd = async () => {
-    try {
-      const res = await axios.post(`${apiRoute}/solution/add`, {
+  const solutionsQuery = useQuery({
+    queryKey: ["solutions"],
+    queryFn: () => {
+      return axios.post(`${apiRoute}/solution/assignment`, {
+        assignmentId,
+      });
+    },
+  });
+
+  const solutionMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/solution/add`, {
         cookie: sessionCookie,
         content,
         link,
         assignmentId,
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["solutions"]);
+      closeModal("createSolution");
+      toast.success("Solution Added");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        closeModal();
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  useEffect(() => {
-    const getDetail = async () => {
-      const res = await axios.post(`${apiRoute}/assignments/detail`, {
-        id: assignmentId,
-      });
-      setDetail(res.data);
-    };
-
-    const getSolutions = async () => {
-      const res = await axios.post(`${apiRoute}/solution/assignment`, {
-        assignmentId,
-      });
-      setSolutions(res.data);
-    };
-
-    getDetail();
-    getSolutions();
-  }, [refresh, assignmentId]);
-
-  return (
-    <div className="assignment">
-      <h1>{detail && detail.subject.name}</h1>
-      <h3>{detail && detail.title}</h3>
-      <p>{detail && formatDeadline(detail.deadline)}</p>
-      {authenticated ? (
-        <div className="create-buttons">
-          <button className="create-button" onClick={openModal}>
-            Add Solution
-          </button>
-          <Modal show={showModal} onClose={closeModal}>
-            <input
-              type="text"
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Solution Description"
-              autoFocus={true}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAdd();
-                }
-              }}
-            />
-            <input
-              type="text"
-              onChange={(e) => setLink(e.target.value)}
-              placeholder="Catbox.moe link for the solution"
-            />
-            <button className="primary-action-button" onClick={handleAdd}>
-              Add
-            </button>
+  if (detailQuery.isLoading || solutionsQuery.isLoading) return <Loader />;
+  else
+    return (
+      <div className="assignment">
+        <h1>{detailQuery.data.data.subject.name}</h1>
+        <h3>{detailQuery.data.data.title}</h3>
+        <p>{formatDeadline(detailQuery.data.data.deadline)}</p>
+        {authenticated ? (
+          <div className="create-buttons">
             <button
-              className="secondary-action-button"
-              onClick={() => {
-                closeModal();
-              }}
+              className="create-button"
+              onClick={() => openModal("createSolution")}
             >
-              Cancel
+              Add Solution
             </button>
-          </Modal>
-        </div>
-      ) : (
-        "Login to add your own solutions"
-      )}
-      {solutions.length > 0 ? (
-        <div className="list">
-          {solutions.map((s) => (
-            <SolutionCard
-              key={s.id}
-              data={s}
-              refresh={refresh}
-              setRefresh={setRefresh}
-            />
-          ))}
-        </div>
-      ) : (
-        <h4>No solutions yet</h4>
-      )}
-    </div>
-  );
+            <Modal id="createSolution">
+              <input
+                type="text"
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Solution Description"
+                autoFocus={true}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    solutionMutation.mutate();
+                  }
+                }}
+              />
+              <input
+                type="text"
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="Catbox.moe link for the solution"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    solutionMutation.mutate();
+                  }
+                }}
+              />
+              <button
+                className="primary-action-button"
+                onClick={() => solutionMutation.mutate()}
+                disabled={solutionMutation.isPending}
+              >
+                {solutionMutation.isPending ? "Creating..." : "Create"}
+              </button>
+              <button
+                className="secondary-action-button"
+                onClick={() => closeModal("createSolution")}
+              >
+                Cancel
+              </button>
+            </Modal>
+          </div>
+        ) : (
+          "Login to add your own solutions"
+        )}
+        {solutionsQuery.data.data.length > 0 ? (
+          <div className="list">
+            {solutionsQuery.data.data.map((s) => (
+              <SolutionCard key={s.id} data={s} />
+            ))}
+          </div>
+        ) : (
+          <h4>No solutions yet</h4>
+        )}
+      </div>
+    );
 };
 
 export default Assignment;

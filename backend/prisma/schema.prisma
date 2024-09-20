@@ -19,8 +19,6 @@ model User{
     solutions Solution[] @relation("UserToSolution")
     notes Note[] @relation("UserToNote")
     papers Paper[] @relation("UserToPaper")
-    resources Resource[] @relation("UserToResource")
-    books Book[] @relation("UserToBook")
     createdAt DateTime @default(now())
 
     @@index([id,name,email])
@@ -87,11 +85,7 @@ model Resource{
     title String
     content String
     link String
-    userId String
-    user User @relation("UserToResource",fields: [userId], references: [id])
     createdAt DateTime @default(now())
-
-    @@index([userId])
 }
 
 model Book{
@@ -99,11 +93,7 @@ model Book{
     title String
     imgUrl String
     link String
-    userId String
-    user User @relation("UserToBook",fields: [userId], references: [id])
     createdAt DateTime @default(now())
-
-    @@index([userId])
 }
 
 model Solution{

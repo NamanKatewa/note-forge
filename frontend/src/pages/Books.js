@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Modal from "../components/Modal";
 import axios from "axios";
 import { apiRoute } from "../utils";
@@ -6,129 +6,124 @@ import toast from "react-hot-toast";
 import BookCard from "../components/BookCard";
 import "./Books.scss";
 import authStore from "../authStore";
+import modalStore from "../modalStore";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Loader from "../components/Loader";
 
 const Books = () => {
-  const [showModal, setShowModal] = useState(false);
   const authenticated = authStore((state) => state.authenticated);
   const sessionCookie = authStore((state) => state.getSessionCookie);
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const role = authStore((state) => state.getUserRole());
   const [title, setTitle] = useState("");
   const [imgUrl, setImgUrl] = useState("");
   const [link, setLink] = useState("");
-  const [resources, setResources] = useState([]);
-  const [refresh, setRefresh] = useState(false);
-  const role = authStore((state) => state.getUserRole);
+  const queryClient = useQueryClient();
 
-  const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
+  const booksQuery = useQuery({
+    queryKey: ["books"],
+    queryFn: () => {
+      return axios.get(`${apiRoute}/books/all`);
+    },
+  });
 
-  const handleCreate = async () => {
-    try {
-      const res = await axios.post(`${apiRoute}/books/add`, {
+  const bookMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/books/add`, {
         cookie: sessionCookie,
         title,
         imgUrl,
         link,
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["books"]);
+      closeModal("createBook");
+      toast.success("Book Added");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        closeModal();
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  const getBooks = async () => {
-    const res = await axios.get(`${apiRoute}/books/all`);
-    setResources(res.data);
-  };
-
-  useEffect(() => {
-    getBooks();
-  }, [refresh, authenticated]);
-
-  return (
-    <div className="books">
-      {authenticated && role === "admin" && (
-        <>
-          <button className="create-button" onClick={openModal}>
-            Create Books
-          </button>
-          <Modal show={showModal} onClose={closeModal}>
-            <label>Title</label>
-            <input
-              type="text"
-              onChange={(e) => {
-                setTitle(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleCreate();
-                }
-              }}
-              placeholder="Book Title"
-              autoFocus={true}
-            />
-            <label>Image</label>
-            <input
-              type="text"
-              onChange={(e) => {
-                setImgUrl(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleCreate();
-                }
-              }}
-              placeholder="Book Image"
-            />
-            <label>Link</label>
-            <input
-              type="text"
-              onChange={(e) => {
-                setLink(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleCreate();
-                }
-              }}
-              placeholder="Book Link"
-            />
-            <button onClick={handleCreate} className="primary-action-button">
-              Create
+  if (booksQuery.isLoading) return <Loader />;
+  else
+    return (
+      <div className="books">
+        {authenticated && role === "admin" && (
+          <>
+            <button
+              className="create-button"
+              onClick={() => openModal("createBook")}
+            >
+              Create Book
             </button>
-            <button className="secondary-action-button" onClick={closeModal}>
-              Cancel
-            </button>
-          </Modal>
-        </>
-      )}
-
-      <div className="section-grid">
-        {resources &&
-          resources.map((r, index) => {
-            const colors = ["primary", "secondary", "muted", "accent"];
-            const color = colors[index % colors.length];
-            return (
-              <BookCard
-                key={r.id}
-                data={r}
-                setRefresh={setRefresh}
-                refresh={refresh}
-                color={color}
+            <Modal id="createBook">
+              <label>Title</label>
+              <input
+                type="text"
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    bookMutation.mutate();
+                  }
+                }}
+                placeholder="Book Title"
+                autoFocus={true}
               />
-            );
-          })}
+              <label>Image</label>
+              <input
+                type="text"
+                onChange={(e) => {
+                  setImgUrl(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    bookMutation.mutate();
+                  }
+                }}
+                placeholder="Book Image"
+              />
+              <label>Link</label>
+              <input
+                type="text"
+                onChange={(e) => {
+                  setLink(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    bookMutation.mutate();
+                  }
+                }}
+                placeholder="Book Link"
+              />
+              <button
+                onClick={() => bookMutation.mutate()}
+                className="primary-action-button"
+                disabled={bookMutation.isPending}
+              >
+                {bookMutation.isPending ? "Creating..." : "Create"}
+              </button>
+              <button className="secondary-action-button" onClick={closeModal}>
+                Cancel
+              </button>
+            </Modal>
+          </>
+        )}
+
+        <div className="section-grid">
+          {booksQuery.data.data &&
+            booksQuery.data.data.map((r, index) => {
+              const colors = ["primary", "secondary", "muted", "accent"];
+              const color = colors[index % colors.length];
+              return <BookCard key={r.id} data={r} color={color} />;
+            })}
+        </div>
       </div>
-    </div>
-  );
+    );
 };
 
 export default Books;

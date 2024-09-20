@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiRoute, formatDeadline } from "../utils";
 import Modal from "../components/Modal";
@@ -7,128 +7,125 @@ import toast from "react-hot-toast";
 import PaperCard from "../components/PaperCard";
 import "./Exam.scss";
 import authStore from "../authStore";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import modalStore from "../modalStore";
+import Loader from "../components/Loader";
 
 const Exam = () => {
-  const [detail, setDetail] = useState();
-  const [refresh, setRefresh] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
   const [title, setTitle] = useState("");
   const [link, setLink] = useState("");
-  const [papers, setPapers] = useState([]);
   const { examId } = useParams();
-  const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
+  const queryClient = useQueryClient();
 
-  const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
+  const detailQuery = useQuery({
+    queryKey: ["exam"],
+    queryFn: () => {
+      return axios.post(`${apiRoute}/exams/detail`, {
+        id: examId,
+      });
+    },
+  });
 
-  const handleAdd = async () => {
-    try {
-      const res = await axios.post(`${apiRoute}/papers/add`, {
+  const papersQuery = useQuery({
+    queryKey: ["papers"],
+    queryFn: () => {
+      return axios.post(`${apiRoute}/papers/exam`, {
+        examId,
+      });
+    },
+  });
+
+  const paperMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/papers/add`, {
         cookie: sessionCookie,
         title,
         link,
         examId,
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["papers"]);
+      closeModal("createPaper");
+      toast.success("Paper Added");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        closeModal();
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  useEffect(() => {
-    const getDetail = async () => {
-      const res = await axios.post(`${apiRoute}/exams/detail`, {
-        id: examId,
-      });
-      setDetail(res.data);
-    };
-
-    const getPapers = async () => {
-      const res = await axios.post(`${apiRoute}/papers/exam`, {
-        examId,
-      });
-      setPapers(res.data);
-    };
-    getDetail();
-    getPapers();
-  }, [refresh, examId]);
-
-  return (
-    <div className="exam">
-      <h1>{detail && detail.subject.name}</h1>
-      <h3>{detail && detail.title}</h3>
-      <p>{detail && formatDeadline(detail.deadline)}</p>
-      {authenticated ? (
-        <div className="create-buttons">
-          <button className="create-button" onClick={openModal}>
-            Add Paper
-          </button>
-          <Modal show={showModal} onClose={closeModal}>
-            <label>Title</label>
-            <input
-              type="text"
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Paper Title"
-              autoFocus={true}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAdd();
-                }
-              }}
-            />
-            <label>Link</label>
-            <input
-              type="text"
-              onChange={(e) => setLink(e.target.value)}
-              placeholder="Catbox.moe link for the solution"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAdd();
-                }
-              }}
-            />
-            <button className="primary-action-button" onClick={handleAdd}>
-              Add
-            </button>
+  if (detailQuery.isLoading || papersQuery.isLoading) return <Loader />;
+  else
+    return (
+      <div className="exam">
+        <h1>{detailQuery.data.data.subject.name}</h1>
+        <h3>{detailQuery.data.data.title}</h3>
+        <p>{formatDeadline(detailQuery.data.data.deadline)}</p>
+        {authenticated ? (
+          <div className="create-buttons">
             <button
-              className="secondary-action-button"
-              onClick={() => {
-                closeModal();
-              }}
+              className="create-button"
+              onClick={() => openModal("createPaper")}
             >
-              Cancel
+              Add Paper
             </button>
-          </Modal>
-        </div>
-      ) : (
-        "Login to add your own solutions"
-      )}
-      {papers.length > 0 ? (
-        <div className="list">
-          {papers.map((s) => (
-            <PaperCard
-              key={s.id}
-              data={s}
-              refresh={refresh}
-              setRefresh={setRefresh}
-            />
-          ))}
-        </div>
-      ) : (
-        <h4>No papers yet</h4>
-      )}
-    </div>
-  );
+            <Modal id="createPaper">
+              <label>Title</label>
+              <input
+                type="text"
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Paper Title"
+                autoFocus={true}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    paperMutation.mutate();
+                  }
+                }}
+              />
+              <label>Link</label>
+              <input
+                type="text"
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="Catbox.moe link for the solution"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    paperMutation.mutate();
+                  }
+                }}
+              />
+              <button
+                className="primary-action-button"
+                onClick={() => paperMutation.mutate()}
+                disabled={paperMutation.isPending}
+              >
+                {paperMutation.isPending ? "Creating..." : "Create"}
+              </button>
+              <button
+                className="secondary-action-button"
+                onClick={() => closeModal("createPaper")}
+              >
+                Cancel
+              </button>
+            </Modal>
+          </div>
+        ) : (
+          "Login to add your own solutions"
+        )}
+        {papersQuery.data.data.length > 0 ? (
+          <div className="list">
+            {papersQuery.data.data.map((s) => (
+              <PaperCard key={s.id} data={s} />
+            ))}
+          </div>
+        ) : (
+          <h4>No papers yet</h4>
+        )}
+      </div>
+    );
 };
 
 export default Exam;

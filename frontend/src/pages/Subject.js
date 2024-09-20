@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import Modal from "../components/Modal";
 import DateTimePicker from "../components/DateTimePicker";
@@ -10,11 +10,15 @@ import ExamCard from "../components/ExamCard";
 import NoteCard from "../components/NoteCard";
 import "./Subject.scss";
 import authStore from "../authStore";
+import modalStore from "../modalStore";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Loader from "../components/Loader";
 
 const Subject = () => {
-  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
-  const [showExamModal, setShowExamModal] = useState(false);
-  const [showNoteModal, setShowNoteModal] = useState(false);
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [assignmentDateTime, setAssignmentDateTime] = useState({
     date: "",
@@ -25,105 +29,95 @@ const Subject = () => {
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
   const [noteLink, setNoteLink] = useState("");
-  const [refresh, setRefresh] = useState(false);
-  const [futureAssignments, setAssignmentFuture] = useState([]);
-  const [pastAssignments, setAssignmentPast] = useState([]);
-  const [futureExams, setExamFuture] = useState([]);
-  const [pastExams, setExamPast] = useState([]);
-  const [notes, setNotes] = useState([]);
-  const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
   const { subjectId, name } = useParams();
+  const queryClient = useQueryClient();
 
-  const openAssignmentModal = () => setShowAssignmentModal(true);
-  const closeAssignmentModal = () => setShowAssignmentModal(false);
-  const openExamModal = () => setShowExamModal(true);
-  const closeExamModal = () => setShowExamModal(false);
-  const openNoteModal = () => setShowNoteModal(true);
-  const closeNoteModal = () => setShowNoteModal(false);
+  const assignmentsQuery = useQuery({
+    queryKey: ["assignments"],
+    queryFn: async () => {
+      const res = await axios.post(`${apiRoute}/assignments/subject`, {
+        subjectId,
+      });
+      const { past, future } = sort(res.data);
+      return { past, future };
+    },
+  });
+  const notesQuery = useQuery({
+    queryKey: ["notes"],
+    queryFn: () => {
+      return axios.post(`${apiRoute}/notes/subject`, {
+        subjectId,
+      });
+    },
+  });
+  const examsQuery = useQuery({
+    queryKey: ["exams"],
+    queryFn: async () => {
+      const res = await axios.post(`${apiRoute}/exams/subject`, {
+        subjectId,
+      });
+      const { past, future } = sort(res.data);
+      return { past, future };
+    },
+  });
 
-  const handleAssignmentDateTimeChange = (dateTimeString) => {
-    setAssignmentDateTime(dateTimeString);
-  };
-  const handleExamDateTimeChange = (dateTimeString) => {
-    setExamDateTime(dateTimeString);
-  };
+  const assignmentMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/assignments/add`, {
+        cookie: sessionCookie,
+        title: assignmentTitle,
+        deadline: assignmentDateTime,
+        subjectId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["assignments"]);
+      closeModal("createAssignment");
+      toast.success("Assignment Added");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-  const handleAddAssignment = async () => {
-    if (assignmentDateTime.date === "" || assignmentDateTime.time === "") {
-      toast.error("Deadline is required");
-    } else {
-      try {
-        const res = await axios.post(`${apiRoute}/assignments/add`, {
-          cookie: sessionCookie,
-          title: assignmentTitle,
-          deadline: assignmentDateTime,
-          subjectId,
-        });
+  const examMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/exams/add`, {
+        cookie: sessionCookie,
+        title: examTitle,
+        deadline: examDateTime,
+        subjectId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["exams"]);
+      closeModal("createExam");
+      toast.success("Exam Added");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-        if (res.status === 200) {
-          toast.success(res.data);
-          setRefresh(!refresh);
-          closeAssignmentModal();
-        }
-      } catch (err) {
-        if (err.response && err.response.data) {
-          toast.error(err.response.data);
-        } else {
-          toast.error("Something went wrong. Try Again");
-        }
-      }
-    }
-  };
-  const handleAddExam = async () => {
-    if (examDateTime.date === "" || examDateTime.time === "") {
-      toast.error("Deadline is required");
-    } else {
-      try {
-        const res = await axios.post(`${apiRoute}/exams/add`, {
-          cookie: sessionCookie,
-          title: examTitle,
-          deadline: examDateTime,
-          subjectId,
-        });
-
-        if (res.status === 200) {
-          toast.success(res.data);
-          setRefresh(!refresh);
-          closeExamModal();
-        }
-      } catch (err) {
-        if (err.response && err.response.data) {
-          toast.error(err.response.data);
-        } else {
-          toast.error("Something went wrong. Try Again");
-        }
-      }
-    }
-  };
-  const handleAddNote = async () => {
-    try {
-      const res = await axios.post(`${apiRoute}/notes/add`, {
+  const noteMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/notes/add`, {
         cookie: sessionCookie,
         title: noteTitle,
         content: noteContent,
         link: noteLink,
         subjectId,
       });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        closeNoteModal();
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["notes"]);
+      closeModal("createNote");
+      toast.success("Note Added");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
   const sort = (items) => {
     const now = new Date();
@@ -144,247 +138,232 @@ const Subject = () => {
     return { past, future };
   };
 
-  useEffect(() => {
-    const getAssignments = async () => {
-      const res = await axios.post(`${apiRoute}/assignments/subject`, {
-        subjectId,
-      });
-      const { past, future } = sort(res.data);
-      setAssignmentFuture(future);
-      setAssignmentPast(past);
+  if (
+    assignmentsQuery.isLoading ||
+    notesQuery.isLoading ||
+    examsQuery.isLoading
+  )
+    return <Loader />;
+  else {
+    const { past: pastAssignments, future: futureAssignments } =
+      assignmentsQuery.data || { past: [], future: [] };
+    const { past: pastExams, future: futureExams } = examsQuery.data || {
+      past: [],
+      future: [],
     };
-    const getNotes = async () => {
-      const res = await axios.post(`${apiRoute}/notes/subject`, {
-        subjectId,
-      });
-      setNotes(res.data);
-    };
-    const getExams = async () => {
-      const res = await axios.post(`${apiRoute}/exams/subject`, {
-        subjectId,
-      });
-      const { past, future } = sort(res.data);
-      setExamFuture(future);
-      setExamPast(past);
-    };
-    getAssignments();
-    getNotes();
-    getExams();
-  }, [refresh, subjectId]);
-
-  return (
-    <div className="subject">
-      <h1>{name}</h1>
-      {authenticated ? (
-        <>
-          <div className="create-buttons">
-            <button className="create-button" onClick={openAssignmentModal}>
-              Add Asignment
-            </button>
-            <button className="create-button" onClick={openNoteModal}>
-              Add Notes
-            </button>
-            <button className="create-button" onClick={openExamModal}>
-              Add Exams
-            </button>
-          </div>
-          <Modal show={showAssignmentModal} onClose={closeAssignmentModal}>
-            <label>Assignment Title</label>
-            <input
-              type="text"
-              placeholder="Enter title"
-              onChange={(e) => setAssignmentTitle(e.target.value)}
-              autoFocus={true}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddAssignment();
-                }
-              }}
-            />
-            <DateTimePicker
-              onDateTimeChange={handleAssignmentDateTimeChange}
-              text="Set deadline"
-              initalTime=""
-              initaliDate=""
-            />
-            <button
-              className="primary-action-button"
-              onClick={handleAddAssignment}
-            >
-              Add
-            </button>
-            <button
-              className="secondary-action-button"
-              onClick={closeAssignmentModal}
-            >
-              Cancel
-            </button>
-          </Modal>
-          <Modal show={showExamModal} onClose={closeExamModal}>
-            <label>Exam Title</label>
-            <input
-              type="text"
-              placeholder="Enter title"
-              onChange={(e) => setExamTitle(e.target.value)}
-              autoFocus={true}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddExam();
-                }
-              }}
-            />
-            <DateTimePicker
-              onDateTimeChange={handleExamDateTimeChange}
-              text="Set deadline"
-              initalTime=""
-              initaliDate=""
-            />
-            <button className="primary-action-button" onClick={handleAddExam}>
-              Add
-            </button>
-            <button
-              className="secondary-action-button"
-              onClick={closeExamModal}
-            >
-              Cancel
-            </button>
-          </Modal>
-          <Modal show={showNoteModal} onClose={closeNoteModal}>
-            <label>Note Title</label>
-            <input
-              type="text"
-              placeholder="Enter title"
-              autoFocus={true}
-              onChange={(e) => setNoteTitle(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddNote();
-                }
-              }}
-            />
-            <label>Note Content</label>
-            <input
-              type="text"
-              placeholder="Enter content"
-              onChange={(e) => setNoteContent(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddNote();
-                }
-              }}
-            />
-            <label>Note Link</label>
-            <input
-              type="text"
-              placeholder="Enter link"
-              onChange={(e) => setNoteLink(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddNote();
-                }
-              }}
-            />
-            <button className="primary-action-button" onClick={handleAddNote}>
-              Add
-            </button>
-            <button
-              className="secondary-action-button"
-              onClick={closeNoteModal}
-            >
-              Cancel
-            </button>
-          </Modal>
-        </>
-      ) : (
-        <div>Login to add assignments, notes and exams</div>
-      )}
-
-      <h2>Assignments</h2>
-
-      {futureAssignments.length > 0 ? (
-        <div className="list">
-          {futureAssignments.map((a) => (
-            <AssignmentCard
-              key={a.id}
-              data={a}
-              refresh={refresh}
-              setRefresh={setRefresh}
-            />
-          ))}
-        </div>
-      ) : (
-        <div>No assignments due</div>
-      )}
-      {pastAssignments.length > 0 ? (
-        <>
-          <h3>Past Due Date</h3>
-          <div className="list">
-            {pastAssignments.map((a) => (
-              <AssignmentCard
-                key={a.id}
-                data={a}
-                refresh={refresh}
-                setRefresh={setRefresh}
+    return (
+      <div className="subject">
+        <h1>{name}</h1>
+        {authenticated ? (
+          <>
+            <div className="create-buttons">
+              <button
+                className="create-button"
+                onClick={() => openModal("createAssignment")}
+              >
+                Add Assignment
+              </button>
+              <button
+                className="create-button"
+                onClick={() => openModal("createExam")}
+              >
+                Add Exams
+              </button>
+              <button
+                className="create-button"
+                onClick={() => openModal("createNote")}
+              >
+                Add Notes
+              </button>
+            </div>
+            <Modal id="createAssignment">
+              <label>Assignment Title</label>
+              <input
+                type="text"
+                placeholder="Enter title"
+                onChange={(e) => setAssignmentTitle(e.target.value)}
+                autoFocus={true}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    assignmentMutation.mutate();
+                  }
+                }}
               />
+              <DateTimePicker
+                onDateTimeChange={(dateTimeString) =>
+                  setAssignmentDateTime(dateTimeString)
+                }
+                text="Set deadline"
+                initalTime=""
+                initaliDate=""
+              />
+              <button
+                className="primary-action-button"
+                onClick={() => assignmentMutation.mutate()}
+                disabled={assignmentMutation.isPending}
+              >
+                {assignmentMutation.isPending ? "Creating..." : "Create"}
+              </button>
+              <button
+                className="secondary-action-button"
+                onClick={() => closeModal("createAssignment")}
+              >
+                Cancel
+              </button>
+            </Modal>
+            <Modal id="createExam">
+              <label>Exam Title</label>
+              <input
+                type="text"
+                placeholder="Enter title"
+                onChange={(e) => setExamTitle(e.target.value)}
+                autoFocus={true}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    examMutation.mutate();
+                  }
+                }}
+              />
+              <DateTimePicker
+                onDateTimeChange={(dateTimeString) =>
+                  setExamDateTime(dateTimeString)
+                }
+                text="Set deadline"
+                initalTime=""
+                initaliDate=""
+              />
+              <button
+                className="primary-action-button"
+                onClick={() => examMutation.mutate()}
+                disabled={examMutation.isPending}
+              >
+                {examMutation.isPending ? "Creating..." : "Create"}{" "}
+              </button>
+              <button
+                className="secondary-action-button"
+                onClick={() => closeModal("createExam")}
+              >
+                Cancel
+              </button>
+            </Modal>
+            <Modal id="createNote">
+              <label>Note Title</label>
+              <input
+                type="text"
+                placeholder="Enter title"
+                autoFocus={true}
+                onChange={(e) => setNoteTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    noteMutation.mutate();
+                  }
+                }}
+              />
+              <label>Note Content</label>
+              <input
+                type="text"
+                placeholder="Enter content"
+                onChange={(e) => setNoteContent(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    noteMutation.mutate();
+                  }
+                }}
+              />
+              <label>Note Link</label>
+              <input
+                type="text"
+                placeholder="Enter link"
+                onChange={(e) => setNoteLink(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    noteMutation.mutate();
+                  }
+                }}
+              />
+              <button
+                className="primary-action-button"
+                onClick={() => noteMutation.mutate()}
+                disabled={noteMutation.isPending}
+              >
+                {noteMutation.isPending ? "Creating..." : "Create"}
+              </button>
+              <button
+                className="secondary-action-button"
+                onClick={() => closeModal("createNote")}
+              >
+                Cancel
+              </button>
+            </Modal>
+          </>
+        ) : (
+          <div>Login to add assignments, notes and exams</div>
+        )}
+
+        <h2>Assignments</h2>
+
+        {futureAssignments.length > 0 ? (
+          <div className="list">
+            {futureAssignments.map((a) => (
+              <AssignmentCard key={a.id} data={a} />
             ))}
           </div>
-        </>
-      ) : (
-        <div>No past assignments.</div>
-      )}
+        ) : (
+          <div>No assignments due</div>
+        )}
+        {pastAssignments.length > 0 ? (
+          <>
+            <h3>Past Due Date</h3>
+            <div className="list">
+              {pastAssignments.map((a) => (
+                <AssignmentCard key={a.id} data={a} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div>No past assignments.</div>
+        )}
 
-      <h2>Exams</h2>
+        <h2>Exams</h2>
 
-      {futureExams.length > 0 ? (
-        <>
-          <div className="list">
-            {futureExams.map((e) => (
-              <ExamCard
-                key={e.id}
-                data={e}
-                refresh={refresh}
-                setRefresh={setRefresh}
-              />
-            ))}
-          </div>
-        </>
-      ) : (
-        <div>No upcoming exams</div>
-      )}
-      {pastExams.length > 0 ? (
-        <>
-          <h2>Past Exams</h2>
-          {pastExams.map((e) => (
-            <ExamCard
-              key={e.id}
-              data={e}
-              refresh={refresh}
-              setRefresh={setRefresh}
-            />
-          ))}
-        </>
-      ) : (
-        <div>No past exams</div>
-      )}
-      <h2>Notes</h2>
-      {notes.length > 0 ? (
-        <>
-          <div className="list">
-            {notes.map((n) => (
-              <NoteCard
-                key={n.id}
-                data={n}
-                refresh={refresh}
-                setRefresh={setRefresh}
-              />
-            ))}
-          </div>
-        </>
-      ) : (
-        <div>No Notes</div>
-      )}
-    </div>
-  );
+        {futureExams.length > 0 ? (
+          <>
+            <div className="list">
+              {futureExams.map((e) => (
+                <ExamCard key={e.id} data={e} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div>No upcoming exams</div>
+        )}
+        {pastExams.length > 0 ? (
+          <>
+            <h2>Past Exams</h2>
+            <div className="list">
+              {pastExams.map((e) => (
+                <ExamCard key={e.id} data={e} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div>No past exams</div>
+        )}
+        <h2>Notes</h2>
+        {notesQuery.data.data.length > 0 ? (
+          <>
+            <div className="list">
+              {notesQuery.data.data.map((n) => (
+                <NoteCard key={n.id} data={n} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div>No Notes</div>
+        )}
+      </div>
+    );
+  }
 };
 
 export default Subject;

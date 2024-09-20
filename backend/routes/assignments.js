@@ -12,7 +12,7 @@ router.post("/subject", async (req, res) => {
         where: { subjectId },
         orderBy: { deadline: "asc" },
       });
-      if (data.length > 0) {
+      if (data) {
         res.status(200).json(data);
       } else {
         res.status(400).json("Not Found");

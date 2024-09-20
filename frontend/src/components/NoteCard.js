@@ -6,72 +6,56 @@ import Modal from "./Modal";
 import { FilePen, Trash2 } from "lucide-react";
 import "./NoteCard.scss";
 import authStore from "../authStore";
+import modalStore from "../modalStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const NoteCard = ({ data, refresh, setRefresh }) => {
-  const [showModal, setShowModal] = useState(false);
+const NoteCard = ({ data }) => {
+  const openModal = modalStore((state) => state.openModal);
+  const closeModal = modalStore((state) => state.closeModal);
+  const authenticated = authStore((state) => state.authenticated);
+  const sessionCookie = authStore((state) => state.getSessionCookie());
+  const role = authStore((state) => state.getUserRole());
+  const id = authStore((state) => state.getUserId());
   const [title, setTitle] = useState(data.title);
   const [content, setContent] = useState(data.content);
   const [link, setLink] = useState(data.link);
-  const authenticated = authStore((state) => state.authenticated);
-  const sessionCookie = authStore((state) => state.getSessionCookie);
-  const role = authStore((state) => state.getUserRole);
-  const id = authStore((state) => state.getUserId);
+  const queryClient = useQueryClient();
 
-  const openModal = (e) => {
-    e.stopPropagation();
-    setShowModal(true);
-  };
-  const closeModal = (e) => {
-    e.stopPropagation();
-    setShowModal(false);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/notes/remove`, {
+        cookie: sessionCookie,
+        id: data.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["notes"]);
+      toast.success("Note Removed");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
-  const handleEdit = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/notes/edit`, {
+  const editMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`${apiRoute}/notes/edit`, {
         cookie: sessionCookie,
         id: data.id,
         title,
         content,
         link,
       });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
-
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.post(`${apiRoute}/notes/remove`, {
-        cookie: sessionCookie,
-        id: data.id,
-      });
-
-      if (res.status === 200) {
-        toast.success(res.data);
-        setRefresh(!refresh);
-        setShowModal(false);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        toast.error(err.response.data);
-      } else {
-        toast.error("Something went wrong. Try Again");
-      }
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["notes"]);
+      closeModal(`editNote${data.id}`);
+      toast.success("Note Edited");
+    },
+    onError: (error) => {
+      toast.error(error.response.data);
+    },
+  });
 
   return (
     <div className="note-card" onClick={() => window.open(data.link, "_blank")}>
@@ -81,8 +65,14 @@ const NoteCard = ({ data, refresh, setRefresh }) => {
       </div>
       {authenticated && (role === "admin" || data.userId === id) && (
         <div className="actions">
-          <FilePen className="icon" onClick={openModal} />
-          <Modal show={showModal} onClose={closeModal}>
+          <FilePen
+            className="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              openModal(`editNote${data.id}`);
+            }}
+          />
+          <Modal id={`editNote${data.id}`}>
             <label>Title</label>
             <input
               type="text"
@@ -92,9 +82,10 @@ const NoteCard = ({ data, refresh, setRefresh }) => {
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
+              autoFocus={true}
             />
             <label>Content</label>
             <input
@@ -105,7 +96,7 @@ const NoteCard = ({ data, refresh, setRefresh }) => {
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
             />
@@ -118,19 +109,29 @@ const NoteCard = ({ data, refresh, setRefresh }) => {
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleEdit();
+                  editMutation.mutate();
                 }
               }}
             />
-            <button className="primary-action-button" onClick={handleEdit}>
-              Save
+            <button
+              className="primary-action-button"
+              onClick={() => editMutation.mutate()}
+              disabled={editMutation.isPending}
+            >
+              {editMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
             <button className="secondary-action-button" onClick={closeModal}>
               Cancel
             </button>
           </Modal>
           {role === "admin" && (
-            <Trash2 className="icon delete" onClick={handleDelete} />
+            <Trash2
+              className="icon delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteMutation.mutate();
+              }}
+            />
           )}
         </div>
       )}
