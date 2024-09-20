@@ -50,9 +50,6 @@ router.post("/add", async (req, res) => {
               title,
               content,
               link,
-              user: {
-                connect: { id: user.id },
-              },
             },
           });
           res.status(200).json("Resource Created");
