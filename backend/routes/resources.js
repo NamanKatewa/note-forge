@@ -12,6 +12,9 @@ router.get("/all", async (req, res) => {
         content: true,
         link: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     res.status(200).json(data);
   } catch (err) {
