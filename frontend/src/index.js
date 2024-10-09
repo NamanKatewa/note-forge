@@ -17,29 +17,36 @@ import Books from "./pages/Books";
 import Exam from "./pages/Exam";
 import Footer from "./components/Footer";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import authStore from "./authStore";
 
 const queryClient = new QueryClient();
 
+function App() {
+  const authenticated = authStore((state) => state.authenticated);
+
+  return (
+    <Router>
+      <QueryClientProvider client={queryClient}>
+        <Toaster />
+        <Navbar />
+        <Routes>
+          <Route path="/" element={authenticated ? <Home /> : <Subjects />} />
+          <Route path="/subjects" element={<Subjects />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/subjects/:subjectId/:name" element={<Subject />} />
+          <Route path="/assignments/:assignmentId" element={<Assignment />} />
+          <Route path="/exams/:examId" element={<Exam />} />
+          <Route path="/search/:query" element={<Search />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/books" element={<Books />} />
+        </Routes>
+        <Footer />
+      </QueryClientProvider>
+    </Router>
+  );
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <Router>
-    <QueryClientProvider client={queryClient}>
-      <Toaster />
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Subjects />} />
-        <Route path="/saved" element={<Home />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/forgotpassword" element={<ForgotPassword />} />
-        <Route path="/subjects/:subjectId/:name" element={<Subject />} />
-        <Route path="/assignments/:assignmentId" element={<Assignment />} />
-        <Route path="/exams/:examId" element={<Exam />} />
-        <Route path="/search/:query" element={<Search />} />
-        <Route path="/resources" element={<Resources />} />
-        <Route path="/books" element={<Books />} />
-      </Routes>
-      <Footer />
-    </QueryClientProvider>
-  </Router>
-);
+root.render(<App />);

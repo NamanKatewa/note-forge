@@ -24,16 +24,18 @@ const NavbarNew = () => {
             </Link>
             <div className="links">
               <Link to="/" className="link">
-                Subjects
+                Home
               </Link>
+              {authenticated && (
+                <Link to="/subjects" className="link">
+                  Subjects
+                </Link>
+              )}
               <Link to="/resources" className="link">
                 Resources
               </Link>
               <Link to="/books" className="link">
                 Books
-              </Link>
-              <Link to="/saved" className="link">
-                Saved
               </Link>
             </div>
           </div>
@@ -117,14 +119,16 @@ const NavbarNew = () => {
           <Link to="/" className="mobileLink">
             Home
           </Link>
+          {authenticated && (
+            <Link to="/subjects" className="mobileLink">
+              Subjects
+            </Link>
+          )}
           <Link to="/resources" className="mobileLink">
             Resources
           </Link>
           <Link to="/books" className="mobileLink">
             Books
-          </Link>
-          <Link to="/saved" className="mobileLink">
-            Saved
           </Link>
           <div className="mobileAuthButtons">
             {authenticated ? (

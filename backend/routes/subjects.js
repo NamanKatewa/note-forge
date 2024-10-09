@@ -219,4 +219,47 @@ router.post("/getsaved", async (req, res) => {
   }
 });
 
+router.post("/home", async (req, res) => {
+  const { cookie } = req.body;
+
+  const data = await db.session.findFirst({ where: { cookie } });
+  if (!cookie) {
+    res.status(401).json("Unauthroized");
+  } else if (!data) {
+    res.status(401).json("Unauthorized");
+  } else {
+    try {
+      subjects = await db.user.findUnique({
+        where: { id: data.userId },
+        select: {
+          subjects: {
+            select: {
+              id: true,
+              name: true,
+              assignments: {
+                where: {
+                  deadline: {
+                    gt: new Date(),
+                  },
+                },
+              },
+              exams: {
+                where: {
+                  deadline: {
+                    gt: new Date(),
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      res.status(200).json(subjects.subjects);
+    } catch (err) {
+      console.error("Error fetching subjects for user: ", err);
+      res.status(500).json("Internal Server Error");
+    }
+  }
+});
+
 module.exports = router;
