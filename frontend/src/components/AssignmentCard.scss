@@ -5,7 +5,8 @@
     color: $card-foreground;
     border-radius: $radius;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    padding: 1.5rem;
+    padding: 2.5rem;
+    position: relative;
     cursor: pointer;
 
 
@@ -16,13 +17,13 @@
         flex-direction: column;
         font-weight: 600;
         font-size: 1.5rem;
-
-        img {
-            width: 20rem;
-        }
     }
 
     .actions {
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
         display: flex;
         justify-content: space-between;
 

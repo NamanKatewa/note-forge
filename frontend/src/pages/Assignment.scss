@@ -9,12 +9,15 @@
         display: flex;
         align-items: center;
         justify-content: space-evenly;
+        display: grid;
+        gap: 2rem;
 
         .create-button {
             width: fit-content;
             background-color: lighten($primary, 10%);
             color: $foreground;
             border: none;
+            border-radius: $radius;
             padding: 0.75rem 1rem;
             cursor: pointer;
         }
@@ -23,9 +26,6 @@
     @media (min-width: 768px) {
         padding: 3rem 1.5rem;
     }
-
-    display: grid;
-    gap: 2rem;
 
     h1 {
         font-size: 2rem;
