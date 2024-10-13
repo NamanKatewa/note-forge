@@ -1,0 +1,45 @@
+@import "../variables.scss";
+
+.announcement-card {
+    color: $card-foreground;
+    border-radius: $radius;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    margin: 2rem;
+    padding: 2.5rem;
+    position: relative;
+    cursor: pointer;
+
+
+    .content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        font-weight: 600;
+        font-size: 1rem;
+
+        h1 {
+            color: $primary-foreground;
+        }
+    }
+
+    .actions {
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+        display: flex;
+        justify-content: space-between;
+
+        .icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            cursor: pointer;
+        }
+
+
+        .delete {
+            color: $destructive
+        }
+    }
+}

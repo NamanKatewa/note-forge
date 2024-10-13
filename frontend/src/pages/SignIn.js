@@ -23,7 +23,6 @@ const SignIn = () => {
       });
     },
     onSuccess: (data) => {
-      console.log(data.data);
       login(data.data.cookie, data.data.role, data.data.userId);
       navigate("/");
     },

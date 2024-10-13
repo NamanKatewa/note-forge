@@ -15,6 +15,7 @@ import Search from "./pages/Search";
 import Resources from "./pages/Resources";
 import Books from "./pages/Books";
 import Exam from "./pages/Exam";
+import Announcements from "./pages/Announcements";
 import Footer from "./components/Footer";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import authStore from "./authStore";
@@ -41,6 +42,7 @@ function App() {
           <Route path="/search/:query" element={<Search />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/books" element={<Books />} />
+          <Route path="/announcements" element={<Announcements />} />
         </Routes>
         <Footer />
       </QueryClientProvider>

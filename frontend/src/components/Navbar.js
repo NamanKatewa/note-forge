@@ -37,6 +37,9 @@ const NavbarNew = () => {
               <Link to="/books" className="link">
                 Books
               </Link>
+              <Link to="/announcements" className="link">
+                Announcements
+              </Link>
             </div>
           </div>
           <div className="right">

@@ -15,6 +15,7 @@ const exams = require("./routes/exams");
 const papers = require("./routes/papers");
 const resources = require("./routes/resources");
 const books = require("./routes/books");
+const announcements = require("./routes/announcements");
 
 const app = express();
 
@@ -72,3 +73,4 @@ app.use("/exams", exams);
 app.use("/papers", papers);
 app.use("/resources", resources);
 app.use("/books", books);
+app.use("/announcements", announcements);
