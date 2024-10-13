@@ -133,6 +133,9 @@ const NavbarNew = () => {
           <Link to="/books" className="mobileLink">
             Books
           </Link>
+          <Link to="/announcements" className="mobileLink">
+            Announcements
+          </Link>
           <div className="mobileAuthButtons">
             {authenticated ? (
               <button
